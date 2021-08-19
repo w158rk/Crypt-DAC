@@ -76,8 +76,19 @@ public class Workload implements IWorkload{
 
     @Override
     public boolean assign_perm() {
-        // TODO Auto-generated method stub
-        return false;
+        IPA pa = new PA();
+        boolean res = false;
+        RandomPicker<IPerm> permPicker = new RandomPicker<IPerm>(perms);
+        RandomPicker<IRole> rolePicker = new RandomPicker<IRole>(roles);
+
+        while(!res) {
+            pa.setPerm(permPicker.getRandomElement());
+            pa.setRole(rolePicker.getRandomElement());
+            res = pa.add();
+        }
+
+        pas.add(pa);
+        return res;
     }
 
     @Override
@@ -89,8 +100,8 @@ public class Workload implements IWorkload{
 
     @Override
     public boolean revoke_perm() {
-        // TODO Auto-generated method stub
-        return false;
+        IPA pa = new RandomPicker<IPA>(pas).getRandomElement();
+        return (pa!=null) && pas.remove(pa) && pa.remove();
     }
 
     public void print_sizes() {

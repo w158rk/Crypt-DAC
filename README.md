@@ -128,7 +128,7 @@ gradle run
 - 配置解析
 - 系统初始化
 - ~~用户增减~~
-- 权限增减
+- ~~权限增减~~
 
 查看 [公开问题](https://github.com/w158rk/Crypt-DAC/issues) 以获取建议功能 (和已知问题)的列表.
 

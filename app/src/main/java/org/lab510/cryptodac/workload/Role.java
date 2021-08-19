@@ -16,13 +16,19 @@ public class Role implements IRole {
     public boolean add(IUR ur) {
         return urs.add(ur);
     }
-    @Override
-    public boolean visit(IPA pa) {
-        return pas.add(pa);
-    }
 
     @Override
     public boolean remove(IUR ur) {
         return urs.remove(ur);
+    }
+
+    @Override
+    public boolean add(IPA pa) {
+        return pas.add(pa);
+    }
+
+    @Override
+    public boolean remove(IPA pa) {
+        return pas.remove(pa);
     }
 }

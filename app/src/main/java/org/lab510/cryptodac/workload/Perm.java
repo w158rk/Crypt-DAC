@@ -12,8 +12,13 @@ public class Perm implements IPerm {
     }
 
     @Override
-    public boolean visit(IPA pa) {
+    public boolean add(IPA pa) {
         return pas.add(pa);
+    }
+
+    @Override
+    public boolean remove(IPA pa) {
+        return pas.remove(pa);
     }
 
 }
