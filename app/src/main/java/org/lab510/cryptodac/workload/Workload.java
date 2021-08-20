@@ -112,4 +112,10 @@ public class Workload implements IWorkload{
         System.out.println("size of pas: " + pas.size());
     }
 
+    @Override
+    public boolean initialize() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }
