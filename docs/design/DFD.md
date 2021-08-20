@@ -3,7 +3,7 @@
 ```mermaid
 graph LR
     config(配置)
-    configparse((配置))
+    configparse((配置解析))
     mapgen((映射生成))
     data((数据))
     sim((模拟))

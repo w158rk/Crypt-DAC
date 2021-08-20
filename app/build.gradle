@@ -37,3 +37,16 @@ tasks.named('test') {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
 }
+
+sourceSets {
+  main {
+    //if you truly want to override the defaults:
+    output.resourcesDir = file('build/classes/java/main')
+  }
+
+  test {
+    //if you truly want to override the defaults:
+    output.resourcesDir = file('build/classes/java/test')
+  }
+
+}
