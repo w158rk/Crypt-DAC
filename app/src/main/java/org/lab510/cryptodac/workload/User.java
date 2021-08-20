@@ -21,4 +21,21 @@ public class User implements IUser {
         return urs.remove(ur);
     }
 
+
+    @Override
+    public int numRoles() {
+        if(urs==null) return 0;
+        return urs.size();
+    }
+
+
+    @Override
+    public boolean contains(IRole role) {
+        if(urs==null) return false;
+        IUR ur = new UR();
+        ur.setUser(this);
+        ur.setRole(role);
+        return urs.contains(ur);
+    }
+
 }

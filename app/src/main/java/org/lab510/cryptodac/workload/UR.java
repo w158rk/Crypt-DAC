@@ -5,11 +5,24 @@ public class UR implements IUR{
     private IUser user = null;
     private IRole role = null;
 
+    public UR() {
+
+    }
+
+    public UR(IUser user, IRole role) {
+        this.user = user;
+        this.role = role;
+    }
 
     @Override
-    public boolean equals(IUR ur) {
-        if(this.user==ur.getUser() && this.role==ur.getRole()) return true;
+    public boolean equals(Object ur) {
+        if(this.user==((UR)ur).getUser() && this.role==((UR)ur).getRole()) return true;
         else return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return user.hashCode() + role.hashCode();
     }
 
     @Override

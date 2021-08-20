@@ -1,33 +1,13 @@
 package org.lab510.cryptodac.workload;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-class RandomPicker<E> {
-    private Set<E> set;
-
-    public RandomPicker(Set<E> set) {
-        this.set = set;
-    }
-
-    private int getRandomInteger(int bound) {
-        return new Random().nextInt(bound);
-    }
-
-    public E getRandomElement() {
-        if(set==null || set.isEmpty()) {
-            return null;
-        }
-
-        int i = getRandomInteger(set.size());
-        for(E e : set) {
-            if (i-- == 0)
-                return e;
-        }
-        return null;
-    }
-}
+import org.lab510.cryptodac.config.Configuration;
+import org.lab510.cryptodac.utils.RandomPicker;
 
 public class Workload implements IWorkload{
 
@@ -36,13 +16,102 @@ public class Workload implements IWorkload{
     private Set<IRole> roles = null;
     private Set<IPA> pas = null;
     private Set<IUR> urs = null;
+    IUser userMax = null, userMin = null;
+    IRole roleMaxU = null, roleMinU = null;
+    IRole roleMaxP = null, roleMinP = null;
+    IPerm permMax = null, permMin = null;
 
-    Workload() {
+    public IUser getUserMax() {
+        return userMax;
+    }
+
+    public IUser getUserMin() {
+        return userMin;
+    }
+
+    public IRole getRoleMaxP() {
+        return roleMaxP;
+    }
+
+    public IRole getRoleMinP() {
+        return roleMinP;
+    }
+
+    public IRole getRoleMaxU() {
+        return roleMaxU;
+    }
+
+    public IRole getRoleMinU() {
+        return roleMinU;
+    }
+
+    public IPerm getPermMax() {
+        return permMax;
+    }
+
+    public IPerm getPermMin() {
+        return permMin;
+    }
+
+    public void setUserMax(IUser userMax) {
+        this.userMax = userMax;
+    }
+
+    public void setUserMin(IUser userMin) {
+        this.userMin = userMin;
+    }
+
+    public void setRoleMaxP(IRole roleMaxP) {
+        this.roleMaxP = roleMaxP;
+    }
+
+    public void setRoleMinP(IRole roleMinP) {
+        this.roleMinP = roleMinP;
+    }
+
+    public void setRoleMaxU(IRole roleMaxU) {
+        this.roleMaxU = roleMaxU;
+    }
+
+
+    public void setRoleMinU(IRole roleMinU) {
+        this.roleMinU = roleMinU;
+    }
+
+    public void setPermMax(IPerm permMax) {
+        this.permMax = permMax;
+    }
+
+    public void setPermMin(IPerm permMin) {
+        this.permMin = permMin;
+    }
+
+    public Workload() {
         users = new HashSet<IUser>();
         perms = new HashSet<IPerm>();
         roles = new HashSet<IRole>();
         pas = new HashSet<IPA>();
         urs = new HashSet<IUR>();
+    }
+
+    public Set<IUser> getUsers() {
+        return users;
+    }
+
+    public Set<IPerm> getPerms() {
+        return perms;
+    }
+
+    public Set<IRole> getRoles() {
+        return roles;
+    }
+
+    public Set<IUR> getUrs() {
+        return urs;
+    }
+
+    public Set<IPA> getPas() {
+        return pas;
     }
 
     public boolean addUser(IUser user) {
@@ -70,9 +139,20 @@ public class Workload implements IWorkload{
             res = ur.add();
         }
 
-        urs.add(ur);
+        res = res && urs.add(ur);
         return res;
     }
+
+    @Override
+    public boolean assign_user(IUser user, IRole role) {
+        IUR ur = new UR();
+        ur.setUser(user);
+        ur.setRole(role);
+        boolean res = ur.add();
+        res = res && urs.add(ur);
+        return res;
+    }
+
 
     @Override
     public boolean assign_perm() {
@@ -112,10 +192,23 @@ public class Workload implements IWorkload{
         System.out.println("size of pas: " + pas.size());
     }
 
+
+
     @Override
-    public boolean initialize() {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean initialize(Configuration conf) {
+        return new WorkloadInitializer().initialize(this, conf);
     }
+
+    @Override
+    public List<Integer> params() {
+        List<Integer> ret = new ArrayList<Integer>();
+        ret.add(Integer.valueOf(users.size()));
+        ret.add(Integer.valueOf(perms.size()));
+        ret.add(Integer.valueOf(roles.size()));
+        ret.add(Integer.valueOf(urs.size()));
+        ret.add(Integer.valueOf(pas.size()));
+        return ret;
+    }
+
 
 }

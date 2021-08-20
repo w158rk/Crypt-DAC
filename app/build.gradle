@@ -38,6 +38,11 @@ tasks.named('test') {
     testLogging.showStandardStreams = true
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:unchecked'
+    options.deprecation = true
+}
+
 sourceSets {
   main {
     //if you truly want to override the defaults:

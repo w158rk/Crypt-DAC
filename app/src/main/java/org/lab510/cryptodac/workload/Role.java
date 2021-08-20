@@ -31,4 +31,31 @@ public class Role implements IRole {
     public boolean remove(IPA pa) {
         return pas.remove(pa);
     }
+
+    @Override
+    public int numUsers() {
+        if(urs==null) return 0;
+        return urs.size();
+    }
+
+    @Override
+    public int numPerms() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public boolean contains(IUser user) {
+        if(urs==null) return false;
+        IUR ur = new UR();
+        ur.setRole(this);
+        ur.setUser(user);
+        return urs.contains(ur);
+    }
+
+    @Override
+    public boolean contains(IPerm perm) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

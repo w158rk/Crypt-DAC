@@ -1,10 +1,17 @@
 package org.lab510.cryptodac.workload;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.lab510.cryptodac.config.ConfigParser;
+import org.lab510.cryptodac.config.Configuration;
 
 public class WorkloadTest {
     @Test
@@ -81,5 +88,48 @@ public class WorkloadTest {
 
     }
 
+    @Test
+    void workloadInitTest() {
+        Configuration conf = null;
 
+        try {
+            conf = new ConfigParser().parse("test.properties");
+        }catch(Exception e) {
+            fail();
+        }
+
+        Workload workload = new Workload();
+        workload.initialize(conf);
+        List<Integer> params = workload.params();
+        // assertEquals(79-2, params.get(0));
+        // assertEquals(231-2, params.get(1));
+        // assertTrue(16<=params.get(2));
+        // assertTrue(18>=params.get(2));
+        assertEquals(79, params.get(0));
+        assertEquals(231, params.get(1));
+        assertEquals(20, params.get(2));
+        assertEquals(75, params.get(3));
+
+        assertEquals(3, workload.getUserMax().numRoles());
+        assertEquals(0, workload.getUserMin().numRoles());
+        assertEquals(30, workload.getRoleMaxU().numUsers());
+        assertEquals(1, workload.getRoleMinU().numUsers());
+
+        for(IUser user: workload.getUsers()) {
+            assertTrue(user.numRoles()<=3);
+            assertTrue(user.numRoles()>=0);
+        }
+
+        for(IRole role: workload.getRoles()) {
+            assertTrue(role.numUsers()>=1);
+            assertTrue(role.numUsers()<=30);
+        }
+
+        assertNotEquals(workload.getPermMax(), workload.getPermMin());
+        assertNotEquals(workload.getRoleMinP(), workload.getRoleMaxP());
+        assertNotEquals(workload.getRoleMinU(), workload.getRoleMaxU());
+        assertNotEquals(workload.getPermMax(), workload.getPermMin());
+
+
+    }
 }

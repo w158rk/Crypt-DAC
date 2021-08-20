@@ -4,6 +4,8 @@ import java.util.Random;
 
 /**
  * generate random parameters for the configuration
+ *
+ * @version 0.0.1
  */
 public class ConfigProcessor {
     private double randomDouble(double low, double high) {

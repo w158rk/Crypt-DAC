@@ -1,0 +1,1 @@
+- 使用HashSet要同时重写`equals`和`hashCode`两个方法
