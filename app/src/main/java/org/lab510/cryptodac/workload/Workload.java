@@ -168,6 +168,15 @@ public class Workload {
         return res;
     }
 
+    public boolean assign_perm(Perm perm, Role role) {
+        PA pa = new PA();
+        pa.setPerm(perm);
+        pa.setRole(role);
+        boolean res = pa.add();
+        res = res && pas.add(pa);
+        return res;
+    }
+
     public boolean revoke_user() {
         UR ur = new RandomPicker<UR>(urs).getRandomElement();
         if(ur==null) return false;

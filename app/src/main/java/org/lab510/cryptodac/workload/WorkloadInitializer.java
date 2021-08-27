@@ -59,10 +59,9 @@ public class WorkloadInitializer {
 
         workload.setRoleMaxU(roleMaxU);
         workload.setRoleMinU(roleMinU);
-        workload.setRoleMinP(roleMinP);
+        workload.setRoleMaxP(rolemaxP);
         workload.setRoleMinP(roleMinP);
 
-        // repeat the above procedure with PA
         Set<Perm> perms = workload.getPerms();
         RandomPicker<Perm> picker = new RandomPicker<>(perms);
         Perm permMax = picker.getRandomElement();
@@ -88,6 +87,10 @@ public class WorkloadInitializer {
     }
 
     private boolean initRelations(Configuration conf) {
+        return initRelationsUR(conf) && initRelationsPA(conf);
+    }
+
+    private boolean initRelationsUR(Configuration conf) {
 
         int numUR = conf.getIntegerValue("numUR");
         int count = 0;
@@ -173,8 +176,97 @@ public class WorkloadInitializer {
                 count ++;
         }
 
+        return true;
+    }
+
+    private boolean initRelationsPA(Configuration conf) {
+
         int numPA = conf.getIntegerValue("numPA");
+        int count = 0;
+        int minRolesPerPerm = conf.getIntegerValue("minRolesPerPerm");
+        int maxRolesPerPerm = conf.getIntegerValue("maxRolesPerPerm");
+        int minPermsPerRole = conf.getIntegerValue("minPermsPerRole");
+        int maxPermsPerRole = conf.getIntegerValue("maxPermsPerRole");
+
+        Set<Perm> perms = workload.getPerms();
+        Set<Role> roles = workload.getRoles();
+        Set<PA> pas = workload.getPas();
+        RandomPicker<Perm> pPicker = new RandomPicker<>(perms);
+        RandomPicker<Role> rPicker = new RandomPicker<>(roles);
+
+        // for every perm, add `minRolesPerPerm` roles
+        for(Perm perm : perms) {
+            count = 0;
+            while(count<minRolesPerPerm) {
+                Role role = rPicker.getRandomElement();
+                if(role.equals(workload.getRoleMinP()))
+                    continue;
+                if(role.numPerms()>=maxPermsPerRole)
+                    continue;
+                if(workload.assign_perm(perm, role))
+                    count ++;
+            }
+        }
+
+        // let the max perm achieve the max
+        count = workload.getPermMax().numRoles();
+        while(count<maxRolesPerPerm) {
+            Role role = rPicker.getRandomElement();
+            if(role.equals(workload.getRoleMinP()))
+                continue;
+            if(role.numPerms()>=maxPermsPerRole)
+                continue;
+            if(workload.assign_perm(workload.getPermMax(), role))
+                count ++;
+        }
+
+        // for every role, add `minPermsPerRole` perms
+        for(Role role : roles) {
+            count = role.numPerms();
+            while(count<minPermsPerRole) {
+                Perm perm = pPicker.getRandomElement();
+                if(perm.equals(workload.getPermMin()))
+                    continue;
+                if(perm.numRoles()>=maxRolesPerPerm)
+                    continue;
+                if(workload.assign_perm(perm, role))
+                    count ++;
+            }
+        }
+
+        // let the max role achieve the max
+        count = workload.getRoleMaxP().numPerms();
+        while(count<maxPermsPerRole) {
+            Perm perm = pPicker.getRandomElement();
+            if(perm.equals(workload.getPermMin()))
+                continue;
+            if(perm.numRoles()>=maxRolesPerPerm)
+                continue;
+            if(workload.assign_perm(perm, workload.getRoleMaxP()))
+                count ++;
+        }
+
+        // add the rest to achieve numPA
+        count = pas.size();
+        while(count<numPA) {
+            Perm perm = pPicker.getRandomElement();
+            Role role = rPicker.getRandomElement();
+
+            if(perm.equals(workload.getPermMin()) || role.equals(workload.getRoleMinP()))
+                continue;
+
+            if(perm.numRoles()>=maxRolesPerPerm || role.numPerms()>=maxPermsPerRole)
+                continue;
+
+            PA pa = new PA(perm, role);
+            if(pas.contains(pa))
+                continue;
+
+            if(workload.assign_perm(perm, role))
+                count ++;
+        }
 
         return true;
     }
+
 }

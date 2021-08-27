@@ -19,4 +19,16 @@ public class Perm {
         return pas.remove(pa);
     }
 
+    public int numRoles() {
+        if(pas==null) return 0;
+        return pas.size();
+    }
+
+
+    public boolean contains(Role role) {
+        if(pas==null) return false;
+        PA pa = new PA(this, role);
+        return pas.contains(pa);
+    }
+
 }

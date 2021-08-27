@@ -39,4 +39,13 @@ public class PA {
         this.perm = perm;
     }
 
+    public PA(Perm perm, Role role) {
+        this.perm = perm;
+        this.role = role;
+    }
+
+    public PA() {
+
+    }
+
 }

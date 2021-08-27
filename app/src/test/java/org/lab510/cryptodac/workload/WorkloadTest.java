@@ -99,6 +99,7 @@ public class WorkloadTest {
         }
 
         Workload workload = new Workload();
+        assertNotNull(workload);
         workload.initialize(conf);
         List<Integer> params = workload.params();
         // assertEquals(79-2, params.get(0));
@@ -109,11 +110,17 @@ public class WorkloadTest {
         assertEquals(231, params.get(1));
         assertEquals(20, params.get(2));
         assertEquals(75, params.get(3));
+        assertEquals(629, params.get(4));
 
         assertEquals(3, workload.getUserMax().numRoles());
         assertEquals(0, workload.getUserMin().numRoles());
         assertEquals(30, workload.getRoleMaxU().numUsers());
         assertEquals(1, workload.getRoleMinU().numUsers());
+
+        assertEquals(209, workload.getRoleMaxP().numPerms());
+        assertEquals(1, workload.getRoleMinP().numPerms());
+        assertEquals(10, workload.getPermMax().numRoles());
+        assertEquals(1, workload.getPermMin().numRoles());
 
         for(User user: workload.getUsers()) {
             assertTrue(user.numRoles()<=3);
@@ -123,6 +130,13 @@ public class WorkloadTest {
         for(Role role: workload.getRoles()) {
             assertTrue(role.numUsers()>=1);
             assertTrue(role.numUsers()<=30);
+            assertTrue(role.numPerms()>=1);
+            assertTrue(role.numPerms()<=209);
+        }
+
+        for(Perm perm: workload.getPerms()) {
+            assertTrue(perm.numRoles()>=1);
+            assertTrue(perm.numRoles()<=10);
         }
 
         assertNotEquals(workload.getPermMax(), workload.getPermMin());

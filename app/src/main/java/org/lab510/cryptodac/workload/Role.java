@@ -34,8 +34,7 @@ public class Role {
     }
 
     public int numPerms() {
-        // TODO Auto-generated method stub
-        return 0;
+        return pas.size();
     }
 
     public boolean contains(User user) {
