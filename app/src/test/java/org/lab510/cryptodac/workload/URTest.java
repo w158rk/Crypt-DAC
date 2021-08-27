@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test;
 public class URTest {
     @Test
     void testEquals() {
-        IUser user = new User();
-        IRole role = new Role();
-        IUR ur1 = new UR();
+        User user = new User();
+        Role role = new Role();
+        UR ur1 = new UR();
         ur1.setRole(role);
         ur1.setUser(user);
-        IUR ur2 = new UR();
+        UR ur2 = new UR();
         ur2.setRole(role);
         ur2.setUser(user);
 

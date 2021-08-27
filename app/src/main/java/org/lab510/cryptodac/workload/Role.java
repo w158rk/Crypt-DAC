@@ -3,58 +3,51 @@ package org.lab510.cryptodac.workload;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Role implements IRole {
-    private Set<IUR> urs = null;
-    private Set<IPA> pas = null;
+public class Role {
+    private Set<UR> urs = null;
+    private Set<PA> pas = null;
 
     Role() {
-        urs = new HashSet<IUR>();
-        pas = new HashSet<IPA>();
+        urs = new HashSet<UR>();
+        pas = new HashSet<PA>();
     }
 
-    @Override
-    public boolean add(IUR ur) {
+    public boolean add(UR ur) {
         return urs.add(ur);
     }
 
-    @Override
-    public boolean remove(IUR ur) {
+    public boolean remove(UR ur) {
         return urs.remove(ur);
     }
 
-    @Override
-    public boolean add(IPA pa) {
+    public boolean add(PA pa) {
         return pas.add(pa);
     }
 
-    @Override
-    public boolean remove(IPA pa) {
+    public boolean remove(PA pa) {
         return pas.remove(pa);
     }
 
-    @Override
     public int numUsers() {
         if(urs==null) return 0;
         return urs.size();
     }
 
-    @Override
     public int numPerms() {
         // TODO Auto-generated method stub
         return 0;
     }
 
-    @Override
-    public boolean contains(IUser user) {
+    public boolean contains(User user) {
         if(urs==null) return false;
-        IUR ur = new UR();
+        UR ur = new UR();
         ur.setRole(this);
         ur.setUser(user);
         return urs.contains(ur);
     }
 
-    @Override
-    public boolean contains(IPerm perm) {
+
+    public boolean contains(Perm perm) {
         // TODO Auto-generated method stub
         return false;
     }

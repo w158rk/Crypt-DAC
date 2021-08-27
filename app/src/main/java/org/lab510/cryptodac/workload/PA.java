@@ -1,11 +1,10 @@
 package org.lab510.cryptodac.workload;
 
-public class PA implements IPA{
+public class PA {
 
-    IPerm perm = null;
-    IRole role = null;
+    Perm perm = null;
+    Role role = null;
 
-    @Override
     public boolean add() {
         return (perm!=null)
             && (role!=null)
@@ -13,7 +12,6 @@ public class PA implements IPA{
             && role.add(this);
     }
 
-    @Override
     public boolean remove() {
         return (perm!=null)
         && (role!=null)
@@ -21,28 +19,23 @@ public class PA implements IPA{
         && role.remove(this);
     }
 
-    @Override
-    public boolean equals(IPA pa) {
+    public boolean equals(PA pa) {
         return (perm==pa.getPerm()) && (role==pa.getRole());
     }
 
-    @Override
-    public IRole getRole() {
+    public Role getRole() {
         return role;
     }
 
-    @Override
-    public IPerm getPerm() {
+    public Perm getPerm() {
         return perm;
     }
 
-    @Override
-    public void setRole(IRole role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
-    @Override
-    public void setPerm(IPerm perm) {
+    public void setPerm(Perm perm) {
         this.perm = perm;
     }
 

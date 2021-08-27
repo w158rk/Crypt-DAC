@@ -9,129 +9,128 @@ import java.util.Set;
 import org.lab510.cryptodac.config.Configuration;
 import org.lab510.cryptodac.utils.RandomPicker;
 
-public class Workload implements IWorkload{
+public class Workload {
 
-    private Set<IUser> users = null;
-    private Set<IPerm> perms = null;
-    private Set<IRole> roles = null;
-    private Set<IPA> pas = null;
-    private Set<IUR> urs = null;
-    IUser userMax = null, userMin = null;
-    IRole roleMaxU = null, roleMinU = null;
-    IRole roleMaxP = null, roleMinP = null;
-    IPerm permMax = null, permMin = null;
+    private Set<User> users = null;
+    private Set<Perm> perms = null;
+    private Set<Role> roles = null;
+    private Set<PA> pas = null;
+    private Set<UR> urs = null;
+    User userMax = null, userMin = null;
+    Role roleMaxU = null, roleMinU = null;
+    Role roleMaxP = null, roleMinP = null;
+    Perm permMax = null, permMin = null;
 
-    public IUser getUserMax() {
+    public User getUserMax() {
         return userMax;
     }
 
-    public IUser getUserMin() {
+    public User getUserMin() {
         return userMin;
     }
 
-    public IRole getRoleMaxP() {
+    public Role getRoleMaxP() {
         return roleMaxP;
     }
 
-    public IRole getRoleMinP() {
+    public Role getRoleMinP() {
         return roleMinP;
     }
 
-    public IRole getRoleMaxU() {
+    public Role getRoleMaxU() {
         return roleMaxU;
     }
 
-    public IRole getRoleMinU() {
+    public Role getRoleMinU() {
         return roleMinU;
     }
 
-    public IPerm getPermMax() {
+    public Perm getPermMax() {
         return permMax;
     }
 
-    public IPerm getPermMin() {
+    public Perm getPermMin() {
         return permMin;
     }
 
-    public void setUserMax(IUser userMax) {
+    public void setUserMax(User userMax) {
         this.userMax = userMax;
     }
 
-    public void setUserMin(IUser userMin) {
+    public void setUserMin(User userMin) {
         this.userMin = userMin;
     }
 
-    public void setRoleMaxP(IRole roleMaxP) {
+    public void setRoleMaxP(Role roleMaxP) {
         this.roleMaxP = roleMaxP;
     }
 
-    public void setRoleMinP(IRole roleMinP) {
+    public void setRoleMinP(Role roleMinP) {
         this.roleMinP = roleMinP;
     }
 
-    public void setRoleMaxU(IRole roleMaxU) {
+    public void setRoleMaxU(Role roleMaxU) {
         this.roleMaxU = roleMaxU;
     }
 
 
-    public void setRoleMinU(IRole roleMinU) {
+    public void setRoleMinU(Role roleMinU) {
         this.roleMinU = roleMinU;
     }
 
-    public void setPermMax(IPerm permMax) {
+    public void setPermMax(Perm permMax) {
         this.permMax = permMax;
     }
 
-    public void setPermMin(IPerm permMin) {
+    public void setPermMin(Perm permMin) {
         this.permMin = permMin;
     }
 
     public Workload() {
-        users = new HashSet<IUser>();
-        perms = new HashSet<IPerm>();
-        roles = new HashSet<IRole>();
-        pas = new HashSet<IPA>();
-        urs = new HashSet<IUR>();
+        users = new HashSet<User>();
+        perms = new HashSet<Perm>();
+        roles = new HashSet<Role>();
+        pas = new HashSet<PA>();
+        urs = new HashSet<UR>();
     }
 
-    public Set<IUser> getUsers() {
+    public Set<User> getUsers() {
         return users;
     }
 
-    public Set<IPerm> getPerms() {
+    public Set<Perm> getPerms() {
         return perms;
     }
 
-    public Set<IRole> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
-    public Set<IUR> getUrs() {
+    public Set<UR> getUrs() {
         return urs;
     }
 
-    public Set<IPA> getPas() {
+    public Set<PA> getPas() {
         return pas;
     }
 
-    public boolean addUser(IUser user) {
+    public boolean addUser(User user) {
         return users.add(user);
     }
 
-    public boolean addRole(IRole role) {
+    public boolean addRole(Role role) {
         return roles.add(role);
     }
 
-    public boolean addPerm(IPerm perm) {
+    public boolean addPerm(Perm perm) {
         return perms.add(perm);
     }
 
-    @Override
     public boolean assign_user() {
-        IUR ur = new UR();
+        UR ur = new UR();
         boolean res = false;
-        RandomPicker<IUser> userPicker = new RandomPicker<IUser>(users);
-        RandomPicker<IRole> rolePicker = new RandomPicker<IRole>(roles);
+        RandomPicker<User> userPicker = new RandomPicker<User>(users);
+        RandomPicker<Role> rolePicker = new RandomPicker<Role>(roles);
 
         while(!res) {
             ur.setUser(userPicker.getRandomElement());
@@ -143,9 +142,8 @@ public class Workload implements IWorkload{
         return res;
     }
 
-    @Override
-    public boolean assign_user(IUser user, IRole role) {
-        IUR ur = new UR();
+    public boolean assign_user(User user, Role role) {
+        UR ur = new UR();
         ur.setUser(user);
         ur.setRole(role);
         boolean res = ur.add();
@@ -154,12 +152,11 @@ public class Workload implements IWorkload{
     }
 
 
-    @Override
     public boolean assign_perm() {
-        IPA pa = new PA();
+        PA pa = new PA();
         boolean res = false;
-        RandomPicker<IPerm> permPicker = new RandomPicker<IPerm>(perms);
-        RandomPicker<IRole> rolePicker = new RandomPicker<IRole>(roles);
+        RandomPicker<Perm> permPicker = new RandomPicker<Perm>(perms);
+        RandomPicker<Role> rolePicker = new RandomPicker<Role>(roles);
 
         while(!res) {
             pa.setPerm(permPicker.getRandomElement());
@@ -171,16 +168,14 @@ public class Workload implements IWorkload{
         return res;
     }
 
-    @Override
     public boolean revoke_user() {
-        IUR ur = new RandomPicker<IUR>(urs).getRandomElement();
+        UR ur = new RandomPicker<UR>(urs).getRandomElement();
         if(ur==null) return false;
         return urs.remove(ur) && ur.remove();
     }
 
-    @Override
     public boolean revoke_perm() {
-        IPA pa = new RandomPicker<IPA>(pas).getRandomElement();
+        PA pa = new RandomPicker<PA>(pas).getRandomElement();
         return (pa!=null) && pas.remove(pa) && pa.remove();
     }
 
@@ -194,12 +189,10 @@ public class Workload implements IWorkload{
 
 
 
-    @Override
     public boolean initialize(Configuration conf) {
         return new WorkloadInitializer().initialize(this, conf);
     }
 
-    @Override
     public List<Integer> params() {
         List<Integer> ret = new ArrayList<Integer>();
         ret.add(Integer.valueOf(users.size()));

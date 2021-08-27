@@ -34,25 +34,25 @@ public class WorkloadInitializer {
         for(int i=0; i<numPerm; i++) ret = ret && workload.addPerm(new Perm());
         for(int i=0; i<numRole; i++) ret = ret && workload.addRole(new Role());
 
-        Set<IUser> users = workload.getUsers();
-        RandomPicker<IUser> uPicker = new RandomPicker<>(users);
-        IUser userMax = uPicker.getRandomElement();
-        IUser userMin = uPicker.getRandomElement();
+        Set<User> users = workload.getUsers();
+        RandomPicker<User> uPicker = new RandomPicker<>(users);
+        User userMax = uPicker.getRandomElement();
+        User userMin = uPicker.getRandomElement();
         while(userMin.equals(userMax)) {
             userMin = uPicker.getRandomElement();
         }
         workload.setUserMax(userMax);
         workload.setUserMin(userMin);
 
-        Set<IRole> roles = workload.getRoles();
-        RandomPicker<IRole> rPicker = new RandomPicker<>(roles);
-        IRole roleMaxU = rPicker.getRandomElement();
-        IRole roleMinU = rPicker.getRandomElement();
+        Set<Role> roles = workload.getRoles();
+        RandomPicker<Role> rPicker = new RandomPicker<>(roles);
+        Role roleMaxU = rPicker.getRandomElement();
+        Role roleMinU = rPicker.getRandomElement();
         while(roleMinU.equals(roleMaxU)) {
             roleMinU = rPicker.getRandomElement();
         }
-        IRole rolemaxP = rPicker.getRandomElement();
-        IRole roleMinP = rPicker.getRandomElement();
+        Role rolemaxP = rPicker.getRandomElement();
+        Role roleMinP = rPicker.getRandomElement();
         while(roleMinP.equals(rolemaxP)) {
             roleMinP = rPicker.getRandomElement();
         }
@@ -62,10 +62,11 @@ public class WorkloadInitializer {
         workload.setRoleMinP(roleMinP);
         workload.setRoleMinP(roleMinP);
 
-        Set<IPerm> perms = workload.getPerms();
-        RandomPicker<IPerm> picker = new RandomPicker<>(perms);
-        IPerm permMax = picker.getRandomElement();
-        IPerm permMin = picker.getRandomElement();
+        // repeat the above procedure with PA
+        Set<Perm> perms = workload.getPerms();
+        RandomPicker<Perm> picker = new RandomPicker<>(perms);
+        Perm permMax = picker.getRandomElement();
+        Perm permMin = picker.getRandomElement();
         while(permMin.equals(permMax)) {
             permMin = picker.getRandomElement();
         }
@@ -94,17 +95,17 @@ public class WorkloadInitializer {
         int maxRolesPerUser = conf.getIntegerValue("maxRolesPerUser");
         int minUsersPerRole = conf.getIntegerValue("minUsersPerRole");
         int maxUsersPerRole = conf.getIntegerValue("maxUsersPerRole");
-        Set<IUser> users = workload.getUsers();
-        Set<IRole> roles = workload.getRoles();
-        Set<IUR> urs = workload.getUrs();
-        RandomPicker<IUser> uPicker = new RandomPicker<>(users);
-        RandomPicker<IRole> rPicker = new RandomPicker<>(roles);
+        Set<User> users = workload.getUsers();
+        Set<Role> roles = workload.getRoles();
+        Set<UR> urs = workload.getUrs();
+        RandomPicker<User> uPicker = new RandomPicker<>(users);
+        RandomPicker<Role> rPicker = new RandomPicker<>(roles);
 
         // for every user, add `minRolesPerUser` role
-        for(IUser user : users) {
+        for(User user : users) {
             count = 0;
             while(count<minRolesPerUser) {
-                IRole role = rPicker.getRandomElement();
+                Role role = rPicker.getRandomElement();
                 if(role.equals(workload.getRoleMinU()))
                     continue;
                 if(role.numUsers()>=maxUsersPerRole)
@@ -117,7 +118,7 @@ public class WorkloadInitializer {
         // let the max user achieve the max
         count = workload.getUserMax().numRoles();
         while(count<maxRolesPerUser) {
-            IRole role = rPicker.getRandomElement();
+            Role role = rPicker.getRandomElement();
             if(role.equals(workload.getRoleMinU()))
                 continue;
             if(role.numUsers()>=maxUsersPerRole)
@@ -127,10 +128,10 @@ public class WorkloadInitializer {
         }
 
         // for every role, add `minUsersPerRole` users
-        for(IRole role : roles) {
+        for(Role role : roles) {
             count = role.numUsers();
             while(count<minUsersPerRole) {
-                IUser user = uPicker.getRandomElement();
+                User user = uPicker.getRandomElement();
                 if(user.equals(workload.getUserMin()))
                     continue;
                 if(user.numRoles()>=maxRolesPerUser)
@@ -143,7 +144,7 @@ public class WorkloadInitializer {
         // let the max role achieve the max
         count = workload.getRoleMaxU().numUsers();
         while(count<maxUsersPerRole) {
-            IUser user = uPicker.getRandomElement();
+            User user = uPicker.getRandomElement();
             if(user.equals(workload.getUserMin()))
                 continue;
             if(user.numRoles()>=maxRolesPerUser)
@@ -155,8 +156,8 @@ public class WorkloadInitializer {
         // add the rest to achieve numUR
         count = urs.size();
         while(count<numUR) {
-            IUser user = uPicker.getRandomElement();
-            IRole role = rPicker.getRandomElement();
+            User user = uPicker.getRandomElement();
+            Role role = rPicker.getRandomElement();
 
             if(user.equals(workload.getUserMin()) || role.equals(workload.getRoleMinU()))
                 continue;
@@ -164,7 +165,7 @@ public class WorkloadInitializer {
             if(user.numRoles()>=maxRolesPerUser || role.numUsers()>=maxUsersPerRole)
                 continue;
 
-            IUR ur = new UR(user, role);
+            UR ur = new UR(user, role);
             if(urs.contains(ur))
                 continue;
 

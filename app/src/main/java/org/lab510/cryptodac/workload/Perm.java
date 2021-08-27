@@ -3,21 +3,19 @@ package org.lab510.cryptodac.workload;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Perm implements IPerm {
+public class Perm {
 
-    private Set<IPA> pas = null;
+    private Set<PA> pas = null;
 
     Perm() {
-        pas = new HashSet<IPA>();
+        pas = new HashSet<PA>();
     }
 
-    @Override
-    public boolean add(IPA pa) {
+    public boolean add(PA pa) {
         return pas.add(pa);
     }
 
-    @Override
-    public boolean remove(IPA pa) {
+    public boolean remove(PA pa) {
         return pas.remove(pa);
     }
 

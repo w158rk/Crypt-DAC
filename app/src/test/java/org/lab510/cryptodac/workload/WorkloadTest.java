@@ -115,12 +115,12 @@ public class WorkloadTest {
         assertEquals(30, workload.getRoleMaxU().numUsers());
         assertEquals(1, workload.getRoleMinU().numUsers());
 
-        for(IUser user: workload.getUsers()) {
+        for(User user: workload.getUsers()) {
             assertTrue(user.numRoles()<=3);
             assertTrue(user.numRoles()>=0);
         }
 
-        for(IRole role: workload.getRoles()) {
+        for(Role role: workload.getRoles()) {
             assertTrue(role.numUsers()>=1);
             assertTrue(role.numUsers()<=30);
         }

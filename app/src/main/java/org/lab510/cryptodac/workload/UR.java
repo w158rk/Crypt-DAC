@@ -1,59 +1,51 @@
 package org.lab510.cryptodac.workload;
 
-public class UR implements IUR{
+public class UR {
 
-    private IUser user = null;
-    private IRole role = null;
+    private User user = null;
+    private Role role = null;
 
     public UR() {
 
     }
 
-    public UR(IUser user, IRole role) {
+    public UR(User user, Role role) {
         this.user = user;
         this.role = role;
     }
 
-    @Override
     public boolean equals(Object ur) {
         if(this.user==((UR)ur).getUser() && this.role==((UR)ur).getRole()) return true;
         else return false;
     }
 
-    @Override
     public int hashCode() {
         return user.hashCode() + role.hashCode();
     }
 
-    @Override
-    public IUser getUser() {
+    public User getUser() {
         return user;
     }
 
-    @Override
-    public IRole getRole() {
+    public Role getRole() {
         return role;
     }
 
-    @Override
     public boolean add() {
         if(user==null || role==null) return false;
         return user.add(this) && role.add(this);
     }
 
-    @Override
     public boolean remove() {
         if(user==null || role==null) return false;
         return user.remove(this) && role.remove(this);
     }
 
-    @Override
-    public void setUser(IUser user) {
+    public void setUser(User user) {
         this.user = user;
     }
 
-    @Override
-    public void setRole(IRole role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

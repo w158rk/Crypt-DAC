@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test;
 public class UserTest {
     @Test
     void userContainTest() {
-        IUser user = new User();
-        IRole role1  = new Role();
-        IRole role2 = new Role();
+        User user = new User();
+        Role role1  = new Role();
+        Role role2 = new Role();
 
         assertFalse(user.contains(role1));
         assertFalse(user.contains(role2));
 
-        IUR ur1 = new UR();
+        UR ur1 = new UR();
         ur1.setUser(user);
         ur1.setRole(role1);
         ur1.add();
@@ -24,7 +24,7 @@ public class UserTest {
         assertTrue(user.contains(role1));
         assertFalse(user.contains(role2));
 
-        IUR ur2 = new UR();
+        UR ur2 = new UR();
         ur2.setUser(user);
         ur2.setRole(role2);
         ur2.add();
