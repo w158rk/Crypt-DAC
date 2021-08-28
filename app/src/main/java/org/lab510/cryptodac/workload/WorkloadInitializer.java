@@ -5,9 +5,20 @@ import java.util.Set;
 import org.lab510.cryptodac.config.Configuration;
 import org.lab510.cryptodac.utils.RandomPicker;
 
+/**
+ * workload initializer
+ *
+ * @version 0.01
+ */
 public class WorkloadInitializer {
     private Workload workload = null;
 
+    /**
+     *
+     * @param workload workload to be initialized
+     * @param conf configuration used
+     * @return true if success
+     */
     public boolean initialize(Workload workload, Configuration conf) {
         this.workload = workload;
 
@@ -16,8 +27,8 @@ public class WorkloadInitializer {
 
     /**
      * Note: numUser, numPerm and numRole should all larger than 2
-     * @param conf
-     * @return
+     * @param conf Configuration object
+     * @return true if initialization works well
      */
     private boolean initSets(Configuration conf) {
 

@@ -15,7 +15,10 @@ public class ConfigProcessor {
         ret = ret * range;
         return low + ret;
     }
-
+    /**
+     *
+     * @param conf the configuration to be manipulated
+     */
     public void process(Configuration conf) {
 
         double muA = randomDouble(conf.getDoubleValue("muAMin"), conf.getDoubleValue("muAMax"));

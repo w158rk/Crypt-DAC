@@ -12,6 +12,13 @@ import java.util.Properties;
  * @version 0.0.1
  */
 public class ConfigParser {
+    /**
+     *
+     * @param filename the configuration file, should be located in the resource folder
+     * @return Configuration object corresponding to the given filename
+     * @throws IOException
+     * @throws NullPointerException
+     */
     public Configuration parse (String filename) throws IOException,NullPointerException {
         Properties props = new Properties();
         if(!filename.startsWith("/")) {
