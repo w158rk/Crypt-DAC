@@ -73,16 +73,6 @@ public class WorkloadInitializer {
         workload.setPermMin(permMin);
         workload.setPermMax(permMax);
 
-        // remove all the special elements
-        // users.remove(userMax);
-        // users.remove(userMin);
-        // roles.remove(roleMinP);
-        // roles.remove(rolemaxP);
-        // roles.remove(roleMinU);
-        // roles.remove(roleMaxU);
-        // perms.remove(permMin);
-        // perms.remove(permMax);
-
         return ret;
     }
 
@@ -103,13 +93,34 @@ public class WorkloadInitializer {
         Set<UR> urs = workload.getUrs();
         RandomPicker<User> uPicker = new RandomPicker<>(users);
         RandomPicker<Role> rPicker = new RandomPicker<>(roles);
+        boolean checkMin = true;
 
         // for every user, add `minRolesPerUser` role
         for(User user : users) {
             count = 0;
             while(count<minRolesPerUser) {
-                Role role = rPicker.getRandomElement();
-                if(role.equals(workload.getRoleMinU()))
+                // first find the roles where the number of users is under the minUsersPerRole
+                Role role = null;
+                if(checkMin) {
+                    for(Role r : roles) {
+                        if(r.numUsers()<minUsersPerRole) {
+                            role = r;
+                            break;
+                        }
+                    }
+                }
+
+                // add link to the roleMaxU with priority
+                if(role==null && workload.getRoleMaxU().numUsers()<maxUsersPerRole) {
+                    role = workload.getRoleMaxU();
+                }
+
+                if(role==null) {
+                    checkMin = false;
+                    role = rPicker.getRandomElement();
+                }
+
+                if(!checkMin && role.equals(workload.getRoleMinU()))
                     continue;
                 if(role.numUsers()>=maxUsersPerRole)
                     continue;
@@ -117,6 +128,12 @@ public class WorkloadInitializer {
                     count ++;
             }
         }
+
+        // int temp = 0;
+        // for(Role role : roles) {
+        //     System.out.println(temp + ": " + role.numUsers());
+        //     temp ++;
+        // }
 
         // let the max user achieve the max
         count = workload.getUserMax().numRoles();
@@ -143,6 +160,15 @@ public class WorkloadInitializer {
                     count ++;
             }
         }
+
+        // choose the roleMaxU
+        Role roleMaxU = workload.getRoleMaxU();
+        for(Role role : roles) {
+            if(role.numUsers()>roleMaxU.numUsers()) {
+                roleMaxU = role;
+            }
+        }
+        workload.setRoleMaxU(roleMaxU);
 
         // let the max role achieve the max
         count = workload.getRoleMaxU().numUsers();

@@ -146,4 +146,89 @@ public class WorkloadTest {
 
 
     }
+
+    private void workloadInitTest(String filename) {
+        Configuration conf = null;
+
+        try {
+            conf = new ConfigParser().parse(filename);
+        }catch(Exception e) {
+            fail();
+        }
+        assertNotNull(conf);
+        Workload workload = new Workload();
+        assertNotNull(workload);
+        workload.initialize(conf);
+
+        String [] paramNames = {
+            "numUser",
+            "numPerm",
+            "numRole",
+            "numUR",
+            "numPA",
+        };
+
+        List<Integer> params = workload.params();
+        for(int i=0; i<5; i++) {
+            assertEquals(conf.getIntegerValue(paramNames[i]), params.get(i));
+        }
+
+        int maxRolesPerUser = conf.getIntegerValue("maxRolesPerUser");
+        int minRolesPerUser = conf.getIntegerValue("minRolesPerUser");
+        int maxUsersPerRole = conf.getIntegerValue("maxUsersPerRole");
+        int minUsersPerRole = conf.getIntegerValue("minUsersPerRole");
+
+        assertEquals(maxRolesPerUser, workload.getUserMax().numRoles());
+        assertEquals(minRolesPerUser, workload.getUserMin().numRoles());
+        assertEquals(maxUsersPerRole, workload.getRoleMaxU().numUsers());
+        assertEquals(minUsersPerRole, workload.getRoleMinU().numUsers());
+
+        int maxPermsPerRole = conf.getIntegerValue("maxPermsPerRole");
+        int minPermsPerRole = conf.getIntegerValue("minPermsPerRole");
+        int maxRolesPerPerm = conf.getIntegerValue("maxRolesPerPerm");
+        int minRolesPerPerm = conf.getIntegerValue("minRolesPerPerm");
+        assertEquals(maxPermsPerRole, workload.getRoleMaxP().numPerms());
+        assertEquals(minPermsPerRole, workload.getRoleMinP().numPerms());
+        assertEquals(maxRolesPerPerm, workload.getPermMax().numRoles());
+        assertEquals(minRolesPerPerm, workload.getPermMin().numRoles());
+
+        for(User user: workload.getUsers()) {
+            assertTrue(user.numRoles()<=maxRolesPerUser);
+            assertTrue(user.numRoles()>=minRolesPerUser);
+        }
+
+        for(Role role: workload.getRoles()) {
+            assertTrue(role.numUsers()>=minUsersPerRole);
+            assertTrue(role.numUsers()<=maxUsersPerRole);
+            assertTrue(role.numPerms()>=minPermsPerRole);
+            assertTrue(role.numPerms()<=maxPermsPerRole);
+        }
+
+        for(Perm perm: workload.getPerms()) {
+            assertTrue(perm.numRoles()>=minRolesPerPerm);
+            assertTrue(perm.numRoles()<=maxRolesPerPerm);
+        }
+
+        assertNotEquals(workload.getPermMax(), workload.getPermMin());
+        assertNotEquals(workload.getRoleMinP(), workload.getRoleMaxP());
+        assertNotEquals(workload.getRoleMinU(), workload.getRoleMaxU());
+        assertNotEquals(workload.getPermMax(), workload.getPermMin());
+    }
+
+    @Test
+    void workloadInitTestMore() {
+        String [] files = {
+            "domino.properties",
+            "emea.properties",
+            "firewall1.properties",
+            "firewall2.properties",
+            "healthcare.properties",
+            "university.properties"
+        };
+
+        for (String filename : files) {
+            workloadInitTest(filename);
+        }
+    }
+
 }
