@@ -3,227 +3,233 @@ package org.lab510.cryptodac.workload;
 import java.util.Set;
 
 import org.lab510.cryptodac.config.Configuration;
+import org.lab510.cryptodac.error.Error;
+import org.lab510.cryptodac.utils.Pair;
 import org.lab510.cryptodac.utils.RandomPicker;
 
-/**
- * workload initializer
- *
- * @version 0.01
- */
 public class WorkloadInitializer {
     private Workload workload = null;
+    private Configuration configuration;
 
-    /**
-     *
-     * @param workload workload to be initialized
-     * @param conf configuration used
-     * @return true if success
-     */
-    public boolean initialize(Workload workload, Configuration conf) {
+    WorkloadInitializer(Workload workload, Configuration configuration) {
         this.workload = workload;
-
-        return initSets(conf) && initRelations(conf);
+        this.configuration = configuration;
     }
 
-    /**
-     * Note: numUser, numPerm and numRole should all larger than 2
-     * @param conf Configuration object
-     * @return true if initialization works well
-     */
-    private boolean initSets(Configuration conf) {
-
-        if(workload==null) return false;
-        if(conf==null) return false;
-
-        boolean ret = true;
-        int numUser = conf.getIntegerValue("numUser");
-        int numPerm = conf.getIntegerValue("numPerm");
-        int numRole = conf.getIntegerValue("numRole");
-
-
-        for(int i=0; i<numUser; i++) ret = ret && workload.addUser(new User());
-        for(int i=0; i<numPerm; i++) ret = ret && workload.addPerm(new Perm());
-        for(int i=0; i<numRole; i++) ret = ret && workload.addRole(new Role());
-
-        Set<User> users = workload.getUsers();
-        RandomPicker<User> uPicker = new RandomPicker<>(users);
-        User userMax = uPicker.getRandomElement();
-        User userMin = uPicker.getRandomElement();
-        while(userMin.equals(userMax)) {
-            userMin = uPicker.getRandomElement();
-        }
-        workload.setUserMax(userMax);
-        workload.setUserMin(userMin);
-
-        Set<Role> roles = workload.getRoles();
-        RandomPicker<Role> rPicker = new RandomPicker<>(roles);
-        Role roleMaxU = rPicker.getRandomElement();
-        Role roleMinU = rPicker.getRandomElement();
-        while(roleMinU.equals(roleMaxU)) {
-            roleMinU = rPicker.getRandomElement();
-        }
-        Role rolemaxP = rPicker.getRandomElement();
-        Role roleMinP = rPicker.getRandomElement();
-        while(roleMinP.equals(rolemaxP)) {
-            roleMinP = rPicker.getRandomElement();
-        }
-
-        workload.setRoleMaxU(roleMaxU);
-        workload.setRoleMinU(roleMinU);
-        workload.setRoleMaxP(rolemaxP);
-        workload.setRoleMinP(roleMinP);
-
-        Set<Perm> perms = workload.getPerms();
-        RandomPicker<Perm> picker = new RandomPicker<>(perms);
-        Perm permMax = picker.getRandomElement();
-        Perm permMin = picker.getRandomElement();
-        while(permMin.equals(permMax)) {
-            permMin = picker.getRandomElement();
-        }
-
-        workload.setPermMin(permMin);
-        workload.setPermMax(permMax);
-
-        return ret;
+    public void initialize() {
+        initSets();
+        initRelations();
     }
 
-    private boolean initRelations(Configuration conf) {
-        return initRelationsUR(conf) && initRelationsPA(conf);
+    private void initSets() {
+        initUsers();
+        initRoles();
+        initPerms();
     }
 
-    private boolean initRelationsUR(Configuration conf) {
+    private void initUsers() {
+        throwErrorIfNullMember();
 
-        int numUR = conf.getIntegerValue("numUR");
+        int numUser = configuration.getIntegerValue("numUser");
+        for(int i=0; i<numUser; i++) workload.addUser(new User());
+
+        RandomPicker<User> uPicker = new RandomPicker<>(workload.getUsers());
+        Pair<User, User> minMaxUsers = uPicker.getTwoDistinctRandomElements();
+        workload.setUserMin(minMaxUsers.getFirst());
+        workload.setUserMax(minMaxUsers.getSecond());
+
+    }
+
+    private void initPerms() {
+        throwErrorIfNullMember();
+
+        int numPerm = configuration.getIntegerValue("numPerm");
+        for(int i=0; i<numPerm; i++) workload.addPerm(new Perm());
+
+        RandomPicker<Perm> pPicker = new RandomPicker<>(workload.getPerms());
+        Pair<Perm, Perm> minMaxPerms = pPicker.getTwoDistinctRandomElements();
+        workload.setPermMin(minMaxPerms.getFirst());
+        workload.setPermMax(minMaxPerms.getSecond());
+    }
+
+    private void initRoles() {
+        throwErrorIfNullMember();
+
+        int numRole = configuration.getIntegerValue("numRole");
+        for(int i=0; i<numRole; i++) workload.addRole(new Role());
+
+        RandomPicker<Role> rPicker = new RandomPicker<>(workload.getRoles());
+        Pair<Role, Role> minMaxRolesU = rPicker.getTwoDistinctRandomElements();
+        workload.setRoleMinU(minMaxRolesU.getFirst());
+        workload.setRoleMaxU(minMaxRolesU.getSecond());
+
+        Pair<Role, Role> minMaxRolesP = rPicker.getTwoDistinctRandomElements();
+        workload.setRoleMinP(minMaxRolesP.getFirst());
+        workload.setRoleMaxP(minMaxRolesP.getSecond());
+
+    }
+
+    private void throwErrorIfNullMember() {
+        if(configuration==null) {
+            throw new Error("Configuration null");
+        }
+
+        if(workload==null) {
+            throw new Error("Workload null");
+        }
+    }
+
+    private void initRelations() {
+        initRelationsUR();
+        initRelationsPA();
+    }
+
+    private void initRelationsUR() {
+
+        assignMinURsToAllUsers();
+        assignMaxURsToUserMax();
+        assignMinURsToAllRoles();
+
+        // NOTE: Originally, we re-select a roleMaxU here,
+        // Now I think it is unnecessary and remove the related
+        // code. If needed later, here we scan the role set and
+        // find the one that with the maximum number of users
+
+        assignMaxURsToRoleMaxU();
+        addRandomURsToAchiveNumUR();
+
+    }
+
+    private void assignMinURsToAllUsers() {
+        throwErrorIfNullMember();
+
+        for(User user : workload.getUsers()) {
+            assignMinURsToUser(user);
+        }
+    }
+
+    private void assignMinURsToUser(User user) {
+        int minRolesPerUser = configuration.getIntegerValue("minRolesPerUser");
         int count = 0;
-        int minRolesPerUser = conf.getIntegerValue("minRolesPerUser");
-        int maxRolesPerUser = conf.getIntegerValue("maxRolesPerUser");
-        int minUsersPerRole = conf.getIntegerValue("minUsersPerRole");
-        int maxUsersPerRole = conf.getIntegerValue("maxUsersPerRole");
-        Set<User> users = workload.getUsers();
-        Set<Role> roles = workload.getRoles();
-        Set<UR> urs = workload.getUrs();
-        RandomPicker<User> uPicker = new RandomPicker<>(users);
-        RandomPicker<Role> rPicker = new RandomPicker<>(roles);
-        boolean checkMin = true;
+        while(count<minRolesPerUser) {
+            Role role = findRoleWithPriority();
+            if(workload.assign_user(user, role)) count ++;
+        }
+    }
 
-        // for every user, add `minRolesPerUser` role
-        for(User user : users) {
-            count = 0;
-            while(count<minRolesPerUser) {
-                // first find the roles where the number of users is under the minUsersPerRole
-                Role role = null;
-                if(checkMin) {
-                    for(Role r : roles) {
-                        if(r.numUsers()<minUsersPerRole) {
-                            role = r;
-                            break;
-                        }
-                    }
-                }
+    private Role findRoleWithPriority() {
+        int maxUsersPerRole = configuration.getIntegerValue("maxUsersPerRole");
 
-                // add link to the roleMaxU with priority
-                if(role==null && workload.getRoleMaxU().numUsers()<maxUsersPerRole) {
-                    role = workload.getRoleMaxU();
-                }
+        Role role = findFirstRoleWithUsersLessThanMin();
+        if(role!=null) return role;
 
-                if(role==null) {
-                    checkMin = false;
-                    role = rPicker.getRandomElement();
-                }
+        if(workload.getRoleMaxU().numUsers()<maxUsersPerRole) return workload.getRoleMaxU();
 
-                if(!checkMin && role.equals(workload.getRoleMinU()))
-                    continue;
-                if(role.numUsers()>=maxUsersPerRole)
-                    continue;
-                if(workload.assign_user(user, role))
-                    count ++;
-            }
+        return findRandomRoleAvailableForMoreUser();
+    }
+
+
+    private Role findFirstRoleWithUsersLessThanMin() {
+        int minUsersPerRole = configuration.getIntegerValue("minUsersPerRole");
+        for(Role r : workload.getRoles()) {
+            if(r.numUsers()<minUsersPerRole) return r;
+        }
+        return null;
+    }
+
+    private Role findRandomRoleAvailableForMoreUser() {
+        int maxUsersPerRole = configuration.getIntegerValue("maxUsersPerRole");
+        final int MAX_TRIES = 10;
+        int attempts = 0;
+        Role role = null;
+
+        while(role==null && attempts<MAX_TRIES) {
+            attempts ++;
+            RandomPicker<Role> picker = new RandomPicker<>(workload.getRoles());
+            role = picker.getRandomElement();
+
+            if(role.equals(workload.getRoleMinU()) || role.numUsers()>=maxUsersPerRole) role = null;
         }
 
-        // int temp = 0;
-        // for(Role role : roles) {
-        //     System.out.println(temp + ": " + role.numUsers());
-        //     temp ++;
-        // }
+        if(role==null) throw new Error("Cannot find any role available for more users");
 
-        // let the max user achieve the max
-        count = workload.getUserMax().numRoles();
-        while(count<maxRolesPerUser) {
-            Role role = rPicker.getRandomElement();
-            if(role.equals(workload.getRoleMinU()))
-                continue;
-            if(role.numUsers()>=maxUsersPerRole)
-                continue;
-            if(workload.assign_user(workload.getUserMax(), role))
-                count ++;
+        return role;
+    }
+
+    private void assignMaxURsToUserMax() {
+        int maxRolesPerUser = configuration.getIntegerValue("maxRolesPerUser");
+        int count = workload.getUserMax().numRoles();
+        while(count < maxRolesPerUser) {
+            Role role = findRandomRoleAvailableForMoreUser();
+            if(workload.assign_user(workload.getUserMax(), role)) count ++;
+        }
+    }
+
+    private void assignMinURsToAllRoles() {
+        for(Role role : workload.getRoles()) {
+            assignMinURsToRole(role);
+        }
+    }
+
+    private void assignMinURsToRole(Role role) {
+        int minUsersPerRole = configuration.getIntegerValue("minUsersPerRole");
+        int count = role.numUsers();
+        while(count < minUsersPerRole) {
+            User user = findRandomUserAvailableForMoreRole();
+            if(workload.assign_user(user, role)) count ++;
+        }
+    }
+
+    private User findRandomUserAvailableForMoreRole() {
+        int maxRolesPerUser = configuration.getIntegerValue("maxRolesPerUser");
+        final int MAX_TRIES = 10;
+        int attempts = 0;
+        User user = null;
+
+        while(user==null && attempts<MAX_TRIES) {
+            attempts ++;
+            RandomPicker<User> picker = new RandomPicker<>(workload.getUsers());
+            user = picker.getRandomElement();
+
+            if(user.equals(workload.getUserMin()) || user.numRoles()>=maxRolesPerUser) user = null;
         }
 
-        // for every role, add `minUsersPerRole` users
-        for(Role role : roles) {
-            count = role.numUsers();
-            while(count<minUsersPerRole) {
-                User user = uPicker.getRandomElement();
-                if(user.equals(workload.getUserMin()))
-                    continue;
-                if(user.numRoles()>=maxRolesPerUser)
-                    continue;
-                if(workload.assign_user(user, role))
-                    count ++;
-            }
-        }
+        if(user==null) throw new Error("Cannot find any user available for more roles.");
 
-        // choose the roleMaxU
-        Role roleMaxU = workload.getRoleMaxU();
-        for(Role role : roles) {
-            if(role.numUsers()>roleMaxU.numUsers()) {
-                roleMaxU = role;
-            }
-        }
-        workload.setRoleMaxU(roleMaxU);
+        return user;
+    }
 
-        // let the max role achieve the max
-        count = workload.getRoleMaxU().numUsers();
+    private void assignMaxURsToRoleMaxU() {
+        int maxUsersPerRole = configuration.getIntegerValue("maxUsersPerRole");
+        int count = workload.getRoleMaxU().numUsers();
         while(count<maxUsersPerRole) {
-            User user = uPicker.getRandomElement();
-            if(user.equals(workload.getUserMin()))
-                continue;
-            if(user.numRoles()>=maxRolesPerUser)
-                continue;
-            if(workload.assign_user(user, workload.getRoleMaxU()))
-                count ++;
+            User user = findRandomUserAvailableForMoreRole();
+            if(workload.assign_user(user, workload.getRoleMaxU())) count ++;
         }
+    }
 
-        // add the rest to achieve numUR
-        count = urs.size();
+    private void addRandomURsToAchiveNumUR() {
+        Set<UR> urs = workload.getUrs();
+        int count = urs.size();
+        int numUR = configuration.getIntegerValue("numUR");
+
         while(count<numUR) {
-            User user = uPicker.getRandomElement();
-            Role role = rPicker.getRandomElement();
-
-            if(user.equals(workload.getUserMin()) || role.equals(workload.getRoleMinU()))
-                continue;
-
-            if(user.numRoles()>=maxRolesPerUser || role.numUsers()>=maxUsersPerRole)
-                continue;
-
-            UR ur = new UR(user, role);
-            if(urs.contains(ur))
-                continue;
+            User user = findRandomUserAvailableForMoreRole();
+            Role role = findRandomRoleAvailableForMoreUser();
 
             if(workload.assign_user(user, role))
                 count ++;
         }
-
-        return true;
     }
 
-    private boolean initRelationsPA(Configuration conf) {
+    private void initRelationsPA() {
 
-        int numPA = conf.getIntegerValue("numPA");
+        int numPA = configuration.getIntegerValue("numPA");
         int count = 0;
-        int minRolesPerPerm = conf.getIntegerValue("minRolesPerPerm");
-        int maxRolesPerPerm = conf.getIntegerValue("maxRolesPerPerm");
-        int minPermsPerRole = conf.getIntegerValue("minPermsPerRole");
-        int maxPermsPerRole = conf.getIntegerValue("maxPermsPerRole");
+        int minRolesPerPerm = configuration.getIntegerValue("minRolesPerPerm");
+        int maxRolesPerPerm = configuration.getIntegerValue("maxRolesPerPerm");
+        int minPermsPerRole = configuration.getIntegerValue("minPermsPerRole");
+        int maxPermsPerRole = configuration.getIntegerValue("maxPermsPerRole");
 
         Set<Perm> perms = workload.getPerms();
         Set<Role> roles = workload.getRoles();
@@ -303,7 +309,6 @@ public class WorkloadInitializer {
                 count ++;
         }
 
-        return true;
     }
 
 }
