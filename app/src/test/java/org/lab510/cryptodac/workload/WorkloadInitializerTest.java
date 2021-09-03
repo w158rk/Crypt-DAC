@@ -111,10 +111,11 @@ public class WorkloadInitializerTest {
         int minPermsPerRole = conf.getIntegerValue("minPermsPerRole");
         int maxRolesPerPerm = conf.getIntegerValue("maxRolesPerPerm");
         int minRolesPerPerm = conf.getIntegerValue("minRolesPerPerm");
-        assertEquals(maxPermsPerRole, workload.getRoleMaxP().numPerms());
-        assertEquals(minPermsPerRole, workload.getRoleMinP().numPerms());
         assertEquals(maxRolesPerPerm, workload.getPermMax().numRoles());
         assertEquals(minRolesPerPerm, workload.getPermMin().numRoles());
+        assertEquals(maxPermsPerRole, workload.getRoleMaxP().numPerms());
+        assertEquals(minPermsPerRole, workload.getRoleMinP().numPerms());
+
 
         for(User user: workload.getUsers()) {
             assertTrue(user.numRoles()<=maxRolesPerUser);

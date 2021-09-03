@@ -112,12 +112,12 @@ public class WorkloadInitializer {
         int minRolesPerUser = configuration.getIntegerValue("minRolesPerUser");
         int count = 0;
         while(count<minRolesPerUser) {
-            Role role = findRoleWithPriority();
+            Role role = findRoleForUserWithPriority();
             if(workload.assign_user(user, role)) count ++;
         }
     }
 
-    private Role findRoleWithPriority() {
+    private Role findRoleForUserWithPriority() {
         int maxUsersPerRole = configuration.getIntegerValue("maxUsersPerRole");
 
         Role role = findFirstRoleWithUsersLessThanMin();
@@ -237,78 +237,134 @@ public class WorkloadInitializer {
         RandomPicker<Perm> pPicker = new RandomPicker<>(perms);
         RandomPicker<Role> rPicker = new RandomPicker<>(roles);
 
-        // for every perm, add `minRolesPerPerm` roles
-        for(Perm perm : perms) {
-            count = 0;
-            while(count<minRolesPerPerm) {
-                Role role = rPicker.getRandomElement();
-                if(role.equals(workload.getRoleMinP()))
-                    continue;
-                if(role.numPerms()>=maxPermsPerRole)
-                    continue;
-                if(workload.assign_perm(perm, role))
-                    count ++;
-            }
+        assignMinPAsToAllPerms();
+        assignMaxPAsToPermMax();
+        assignMinPAsToAllRoles();
+        assignMaxPAsToRoleMaxP();
+        addRandomPAsToAchiveNumPA();
+
+    }
+
+    private void assignMinPAsToAllPerms() {
+        for(Perm perm : workload.getPerms()) {
+            assignMinPAsToPerm(perm);
+        }
+    }
+
+    private void assignMinPAsToPerm(Perm perm) {
+        int minRolesPerPerm = configuration.getIntegerValue("minRolesPerPerm");
+        int count = 0;
+        while(count<minRolesPerPerm) {
+            Role role = findRoleForPermWithPriority();
+            if(workload.assign_perm(perm, role)) count ++;
+        }
+    }
+
+    private Role findRoleForPermWithPriority() {
+        int maxPermsPerRole = configuration.getIntegerValue("maxPermsPerRole");
+
+        Role role = findFirstRoleWithPermsLessThanMin();
+        if(role!=null) return role;
+
+        if(workload.getRoleMaxP().numPerms()<maxPermsPerRole) return workload.getRoleMaxP();
+
+        return findRandomRoleAvailableForMorePerm();
+
+    }
+
+    private Role findFirstRoleWithPermsLessThanMin() {
+        int minPermsPerRole = configuration.getIntegerValue("minPermsPerRole");
+        for(Role r : workload.getRoles()) {
+            if(r.numPerms()<minPermsPerRole) return r;
+        }
+        return null;
+    }
+
+    private Role findRandomRoleAvailableForMorePerm() {
+        int maxPermsPerRole = configuration.getIntegerValue("maxPermsPerRole");
+        final int MAX_TRIES = 10;
+        int attempts = 0;
+        Role role = null;
+
+        while(role==null && attempts<MAX_TRIES) {
+            attempts ++;
+            RandomPicker<Role> picker = new RandomPicker<>(workload.getRoles());
+            role = picker.getRandomElement();
+
+            if(role.equals(workload.getRoleMinP()) || role.numPerms()>=maxPermsPerRole) role = null;
         }
 
-        // let the max perm achieve the max
-        count = workload.getPermMax().numRoles();
-        while(count<maxRolesPerPerm) {
-            Role role = rPicker.getRandomElement();
-            if(role.equals(workload.getRoleMinP()))
-                continue;
-            if(role.numPerms()>=maxPermsPerRole)
-                continue;
-            if(workload.assign_perm(workload.getPermMax(), role))
-                count ++;
+        if(role==null) throw new Error("Cannot find any role available for more permissions");
+
+        return role;
+
+    }
+
+    private void assignMaxPAsToPermMax() {
+        int maxRolesPerPerm = configuration.getIntegerValue("maxRolesPerPerm");
+        int count = workload.getPermMax().numRoles();
+        while(count < maxRolesPerPerm) {
+            Role role = findRandomRoleAvailableForMorePerm();
+            if(workload.assign_perm(workload.getPermMax(), role)) count ++;
+        }
+    }
+
+    private void assignMinPAsToAllRoles() {
+        for(Role role : workload.getRoles()) {
+            assignMinPAsToRole(role);
+        }
+    }
+
+    private void assignMinPAsToRole(Role role) {
+        int minPermsPerRole = configuration.getIntegerValue("minPermsPerRole");
+        int count = role.numPerms();
+        while(count < minPermsPerRole) {
+            Perm perm = findRandomPermAvailableForMoreRole();
+            if(workload.assign_perm(perm, role)) count ++;
+        }
+    }
+
+    private Perm findRandomPermAvailableForMoreRole() {
+        int maxRolesPerPerm = configuration.getIntegerValue("maxRolesPerPerm");
+        final int MAX_TRIES = 10;
+        int attempts = 0;
+        Perm perm = null;
+
+        while(perm==null && attempts<MAX_TRIES) {
+            attempts ++;
+            RandomPicker<Perm> picker = new RandomPicker<>(workload.getPerms());
+            perm = picker.getRandomElement();
+
+            if(perm.equals(workload.getPermMin()) || perm.numRoles()>=maxRolesPerPerm) perm = null;
         }
 
-        // for every role, add `minPermsPerRole` perms
-        for(Role role : roles) {
-            count = role.numPerms();
-            while(count<minPermsPerRole) {
-                Perm perm = pPicker.getRandomElement();
-                if(perm.equals(workload.getPermMin()))
-                    continue;
-                if(perm.numRoles()>=maxRolesPerPerm)
-                    continue;
-                if(workload.assign_perm(perm, role))
-                    count ++;
-            }
-        }
+        if(perm==null) throw new Error("Cannot find any perm available for more roles.");
 
-        // let the max role achieve the max
-        count = workload.getRoleMaxP().numPerms();
+        return perm;
+    }
+
+    private void assignMaxPAsToRoleMaxP() {
+        int maxPermsPerRole = configuration.getIntegerValue("maxPermsPerRole");
+        int count = workload.getRoleMaxP().numPerms();
         while(count<maxPermsPerRole) {
-            Perm perm = pPicker.getRandomElement();
-            if(perm.equals(workload.getPermMin()))
-                continue;
-            if(perm.numRoles()>=maxRolesPerPerm)
-                continue;
-            if(workload.assign_perm(perm, workload.getRoleMaxP()))
-                count ++;
+            Perm perm = findRandomPermAvailableForMoreRole();
+            if(workload.assign_perm(perm, workload.getRoleMaxP())) count ++;
         }
+    }
 
-        // add the rest to achieve numPA
-        count = pas.size();
+    private void addRandomPAsToAchiveNumPA() {
+        Set<PA> urs = workload.getPas();
+        int count = urs.size();
+        int numPA = configuration.getIntegerValue("numPA");
+
         while(count<numPA) {
-            Perm perm = pPicker.getRandomElement();
-            Role role = rPicker.getRandomElement();
-
-            if(perm.equals(workload.getPermMin()) || role.equals(workload.getRoleMinP()))
-                continue;
-
-            if(perm.numRoles()>=maxRolesPerPerm || role.numPerms()>=maxPermsPerRole)
-                continue;
-
-            PA pa = new PA(perm, role);
-            if(pas.contains(pa))
-                continue;
+            Perm perm = findRandomPermAvailableForMoreRole();
+            Role role = findRandomRoleAvailableForMorePerm();
 
             if(workload.assign_perm(perm, role))
                 count ++;
         }
-
     }
+
 
 }
