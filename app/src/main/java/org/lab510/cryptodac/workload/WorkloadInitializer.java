@@ -224,19 +224,6 @@ public class WorkloadInitializer {
 
     private void initRelationsPA() {
 
-        int numPA = configuration.getIntegerValue("numPA");
-        int count = 0;
-        int minRolesPerPerm = configuration.getIntegerValue("minRolesPerPerm");
-        int maxRolesPerPerm = configuration.getIntegerValue("maxRolesPerPerm");
-        int minPermsPerRole = configuration.getIntegerValue("minPermsPerRole");
-        int maxPermsPerRole = configuration.getIntegerValue("maxPermsPerRole");
-
-        Set<Perm> perms = workload.getPerms();
-        Set<Role> roles = workload.getRoles();
-        Set<PA> pas = workload.getPas();
-        RandomPicker<Perm> pPicker = new RandomPicker<>(perms);
-        RandomPicker<Role> rPicker = new RandomPicker<>(roles);
-
         assignMinPAsToAllPerms();
         assignMaxPAsToPermMax();
         assignMinPAsToAllRoles();

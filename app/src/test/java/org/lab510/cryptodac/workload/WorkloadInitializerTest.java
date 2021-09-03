@@ -25,10 +25,6 @@ public class WorkloadInitializerTest {
         WorkloadInitializer initializer = new WorkloadInitializer(workload, conf);
         initializer.initialize();
         List<Integer> params = workload.params();
-        // assertEquals(79-2, params.get(0));
-        // assertEquals(231-2, params.get(1));
-        // assertTrue(16<=params.get(2));
-        // assertTrue(18>=params.get(2));
         assertEquals(79, params.get(0));
         assertEquals(231, params.get(1));
         assertEquals(20, params.get(2));
