@@ -11,7 +11,7 @@ public class ConfigParserTest {
     void configParseFailTest() {
         String filename = "123.properties";
         try {
-            Configuration configuration = new ConfigParser().parse(filename);
+            new ConfigParser().parse(filename);
         } catch (NullPointerException e) {
 
         } catch (Exception e) {

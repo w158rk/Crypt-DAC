@@ -11,7 +11,7 @@ public class WorkloadInitializer {
     private Workload workload = null;
     private Configuration configuration;
 
-    WorkloadInitializer(Workload workload, Configuration configuration) {
+    public WorkloadInitializer(Workload workload, Configuration configuration) {
         this.workload = workload;
         this.configuration = configuration;
     }

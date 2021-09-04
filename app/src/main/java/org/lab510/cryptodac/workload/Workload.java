@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.lab510.cryptodac.config.Configuration;
 import org.lab510.cryptodac.utils.RandomPicker;
 
 public class Workload {
@@ -111,6 +110,10 @@ public class Workload {
 
     public Set<PA> getPas() {
         return pas;
+    }
+
+    public boolean addUser() {
+        return users.add(new User());
     }
 
     public boolean addUser(User user) {

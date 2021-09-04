@@ -1,17 +1,8 @@
 package org.lab510.cryptodac.workload;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import org.lab510.cryptodac.config.ConfigParser;
-import org.lab510.cryptodac.config.Configuration;
 import org.lab510.cryptodac.error.Error;
 
 public class WorkloadTest {
