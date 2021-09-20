@@ -12,8 +12,8 @@ import org.lab510.cryptodac.config.ConfigParser;
 import org.lab510.cryptodac.config.ConfigProcessor;
 import org.lab510.cryptodac.config.Configuration;
 
-public class IdentityBasedDACTest {
-    private static IdentityBasedDAC dac = null;
+public class PublicKeyDACTest {
+    private static PublicKeyDAC dac = null;
     private static Configuration config = null;
 
     @BeforeEach
@@ -26,19 +26,34 @@ public class IdentityBasedDACTest {
         catch(IOException e) {
             fail();
         }
-        dac = new IdentityBasedDAC(config);
+        dac = new PublicKeyDAC(config);
+        dac.initializeWorkload();
     }
 
     @Test
     public void testAddUser() {
-        dac.initializeWorkload();
         dac.addUser();
         assertEquals(config.getIntegerValue("numUser")+1, dac.getWorkload().getUsers().size());
         assertEquals(1, dac.getTxs().size());
     }
 
     @Test
+    public void testAssignUser() {
+        dac.assignUser();
+        assertEquals(config.getIntegerValue("numUser"), dac.getWorkload().getUsers().size());
+        assertEquals(config.getIntegerValue("numRole"), dac.getWorkload().getRoles().size());
+        assertEquals(config.getIntegerValue("numUR")+1, dac.getWorkload().getUrs().size());
+        assertEquals(4, dac.getTxs().size());
+    }
+
+    @Test
+    public void testRevokeUser() {
+        dac.revokeUser();
+    }
+
+    @Test
     public void testRun() {
+        assertEquals(config.getIntegerValue("numUR"), dac.getWorkload().getUrs().size());
         dac.run();
         assertEquals(config.getIntegerValue("numUR")+30*dac.getRateAssignUser(), dac.getWorkload().getUrs().size());
         assertEquals(4*30*dac.getRateAssignUser(), dac.getTxs().size());

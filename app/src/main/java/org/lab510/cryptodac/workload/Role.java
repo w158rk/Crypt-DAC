@@ -12,6 +12,14 @@ public class Role {
     private Set<UR> urs = null;
     private Set<PA> pas = null;
 
+    public Set<UR> getUrs() {
+        return urs;
+    }
+
+    public Set<PA> getPas() {
+        return pas;
+    }
+
     /**
      * default constructor
      */

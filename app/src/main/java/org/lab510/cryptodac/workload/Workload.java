@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.lab510.cryptodac.error.Error;
 import org.lab510.cryptodac.utils.RandomPicker;
 
 public class Workload {
@@ -18,6 +19,15 @@ public class Workload {
     Role roleMaxU = null, roleMinU = null;
     Role roleMaxP = null, roleMinP = null;
     Perm permMax = null, permMin = null;
+    private boolean initialized = false;
+
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    public void setInitialized() {
+        initialized = true;
+    }
 
     public User getUserMax() {
         return userMax;
@@ -128,7 +138,7 @@ public class Workload {
         return perms.add(perm);
     }
 
-    public boolean assign_user() {
+    public void assign_user() {
         UR ur = new UR();
         boolean res = false;
         RandomPicker<User> userPicker = new RandomPicker<User>(users);
@@ -140,8 +150,9 @@ public class Workload {
             res = ur.add();
         }
 
-        res = res && urs.add(ur);
-        return res;
+        if(!urs.add(ur)) {
+            throw new Error("the UR is already in URs");
+        }
     }
 
     public boolean assign_user(User user, Role role) {
@@ -178,8 +189,15 @@ public class Workload {
         return res;
     }
 
-    public boolean revoke_user() {
+    public UR revoke_user() {
         UR ur = new RandomPicker<UR>(urs).getRandomElement();
+        if(!revoke_user(ur)) {
+            throw new Error("fail to revoke user");
+        }
+        return ur;
+    }
+
+    public boolean revoke_user(UR ur) {
         if(ur==null) return false;
         return urs.remove(ur) && ur.remove();
     }

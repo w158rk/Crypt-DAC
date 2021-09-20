@@ -20,32 +20,26 @@ public class WorkloadTest {
         boolean res = true;
 
         for(int i=0; i<4; i++) {
-            res = workload.assign_user();
-            assertTrue(res);
+            workload.assign_user();
         }
 
         for(int i=0; i<4; i++) {
-            res = workload.revoke_user();
-            assertTrue(res);
+            workload.revoke_user();
         }
 
         boolean errorCatched = false;
         try {
-            res = workload.revoke_user();
+            workload.revoke_user();
         }
         catch(Error e) {
             errorCatched = true;
         }
         if(!errorCatched) fail();
 
-        res = workload.assign_user();
-        assertTrue(res);
-        res = workload.assign_user();
-        assertTrue(res);
-        res = workload.revoke_user();
-        assertTrue(res);
-        res = workload.assign_user();
-        assertTrue(res);
+        workload.assign_user();
+        workload.assign_user();
+        workload.revoke_user();
+        workload.assign_user();
 
     }
 

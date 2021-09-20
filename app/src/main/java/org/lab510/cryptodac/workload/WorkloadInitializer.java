@@ -17,6 +17,8 @@ public class WorkloadInitializer {
     }
 
     public void initialize() {
+        if(workload.isInitialized()) return;
+        workload.setInitialized();
         initSets();
         initRelations();
     }

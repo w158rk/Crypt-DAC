@@ -1,52 +1,62 @@
 package org.lab510.cryptodac.dac;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.lab510.cryptodac.config.Configuration;
 import org.lab510.cryptodac.time.DayTimer;
+import org.lab510.cryptodac.workload.PA;
+import org.lab510.cryptodac.workload.Role;
+import org.lab510.cryptodac.workload.UR;
+import org.lab510.cryptodac.workload.User;
 import org.lab510.cryptodac.workload.Workload;
 import org.lab510.cryptodac.workload.WorkloadInitializer;
 
-enum Player {
-    PKG,
-    ADMIN;
-}
-
-enum Event {
-    GEN_KEY,
-    ENCRYPT,
-    DECRYPT,
-    SIGN,
-    VERIFY,
-    SYM_ENCRYPT,
-    SYM_DECRYPT;
-}
-
-public class IdentityBasedDAC implements DAC{
-
-    class Transaction {
-        Player who;
-        Event what;
-
-        Transaction(Player who, Event what) {
-            this.who = who;
-            this.what = what;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s : %s", who, what);
-        }
+class PublicKeyUserRevoker {
+    private Workload workload;
+    private List<Transaction<PublicKeyPlayer, PublicKeyEvent>> txs;
+    PublicKeyUserRevoker(Workload workload) {
+        this.workload = workload;
+        txs = new ArrayList<>();
     }
 
+    void revoke() {
+        UR ur = workload.revoke_user();
+
+        txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.GEN_KEY));
+
+        for(int i=0; i<ur.getRole().numUsers(); i++) {
+            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.ENCRYPT));
+            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SIGN));
+        }
+
+        for(PA pa : ur.getRole().getPas()) {
+            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SYM_GEN_KEY));
+            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SYM_DECRYPT));
+            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SYM_ENCRYPT));
+
+            for(int i=0; i<pa.getPerm().numRoles(); i++) {
+                txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.ENCRYPT));
+                txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SIGN));
+            }
+
+        }
+
+    }
+}
+
+public class PublicKeyDAC implements DAC{
+
+
     private Workload workload;
-    private List<Transaction> txs;
+    private List<Transaction<PublicKeyPlayer, PublicKeyEvent>> txs;
     private Configuration configuration;
     private DayTimer dayTimer;
     private int rateAssignUser = 0;
 
-    IdentityBasedDAC(Configuration configuration) {
+    PublicKeyDAC(Configuration configuration) {
         this.configuration = configuration;
         workload = new Workload();
         txs = new ArrayList<>();
@@ -66,14 +76,14 @@ public class IdentityBasedDAC implements DAC{
         initializer.initialize();
     }
 
-    List<Transaction> getTxs() {
+    List<Transaction<PublicKeyPlayer, PublicKeyEvent>> getTxs() {
         return txs;
     }
 
     @Override
     public void addUser() {
         workload.addUser();
-        txs.add(new Transaction(Player.PKG, Event.GEN_KEY));
+        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.GEN_KEY));
     }
 
     @Override
@@ -108,16 +118,16 @@ public class IdentityBasedDAC implements DAC{
 
     @Override
     public void assignUser() {
-        while(!workload.assign_user());
-        txs.add(new Transaction(Player.ADMIN, Event.VERIFY));
-        txs.add(new Transaction(Player.ADMIN, Event.DECRYPT));
-        txs.add(new Transaction(Player.ADMIN, Event.ENCRYPT));
-        txs.add(new Transaction(Player.ADMIN, Event.SIGN));
+        workload.assign_user();
+        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.VERIFY));
+        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.DECRYPT));
+        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.ENCRYPT));
+        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SIGN));
     }
 
     @Override
     public void revokeUser() {
-        // TODO Auto-generated method stub
+        UR ur = workload.revoke_user();
 
     }
 
