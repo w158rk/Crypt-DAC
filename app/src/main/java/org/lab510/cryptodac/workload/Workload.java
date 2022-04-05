@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.lab510.cryptodac.error.Error;
 import org.lab510.cryptodac.utils.RandomPicker;
+import org.lab510.cryptodac.utils.SetFilter;
 
 public class Workload {
 
@@ -126,6 +127,14 @@ public class Workload {
         return users.add(new User());
     }
 
+    public boolean addRole() {
+        return roles.add(new Role());
+    }
+
+    public boolean addPerm() {
+        return perms.add(new Perm());
+    }
+
     public boolean addUser(User user) {
         return users.add(user);
     }
@@ -138,24 +147,101 @@ public class Workload {
         return perms.add(perm);
     }
 
-    public void assign_user() {
-        UR ur = new UR();
-        boolean res = false;
-        RandomPicker<User> userPicker = new RandomPicker<User>(users);
-        RandomPicker<Role> rolePicker = new RandomPicker<Role>(roles);
-
-        while(!res) {
-            ur.setUser(userPicker.getRandomElement());
-            ur.setRole(rolePicker.getRandomElement());
-            res = ur.add();
-        }
-
-        if(!urs.add(ur)) {
-            throw new Error("the UR is already in URs");
-        }
+    public User getRandomUser() {
+        RandomPicker<User> picker = new RandomPicker<User>(users);
+        return picker.getRandomElement();
     }
 
-    public boolean assign_user(User user, Role role) {
+    public Role getRandomRole() {
+        RandomPicker<Role> picker = new RandomPicker<Role>(roles);
+        return picker.getRandomElement();
+    }
+
+    public Perm getRandomPerm() {
+        RandomPicker<Perm> picker = new RandomPicker<Perm>(perms);
+        return picker.getRandomElement();
+    }
+
+    public UR getRandomUr() {
+        RandomPicker<UR> picker = new RandomPicker<UR>(urs);
+        return picker.getRandomElement();
+    }
+
+    public PA getRandomPa() {
+        RandomPicker<PA> picker = new RandomPicker<PA>(pas);
+        return picker.getRandomElement();
+    }
+
+    public boolean removeUser() {
+        return removeUser(getRandomUser());
+    }
+
+    public Role removeRole() {
+        return removeRole(getRandomRole());
+    }
+
+    public boolean removePerm() {
+        return removePerm(getRandomPerm());
+    }
+
+    public boolean removeUser(User user) {
+        // TODO
+        var tUrs = getUrs(user);
+        for (var ur : tUrs) {
+            urs.remove(ur);
+        }
+        return users.remove(user);
+    }
+
+    public Role removeRole(Role role) {
+        var tPas = getPas(role);
+        var tUrs = getUrs(role);
+        assert tPas.size() == 0;
+        assert tUrs.size() == 0;
+
+        if (!roles.remove(role)) {
+            throw new Error("cannot remove the role");
+        }
+
+        return role;
+    }
+
+    public boolean removePerm(Perm perm) {
+        // TODO
+        // remove all the PAs linked to this permission
+        var tPas = getPas(perm);
+        for (var pa : tPas) {
+            pas.remove(pa);
+        }
+        return perms.remove(perm);
+    }
+
+    public Set<PA> getPas(Role role) {
+        return SetFilter.filter(pas, (PA pa) -> pa.getRole() == role);
+    }
+
+    public Set<PA> getPas(Perm perm) {
+        return SetFilter.filter(pas, (PA pa) -> pa.getPerm() == perm);
+    }
+
+    public Set<UR> getUrs(Role role) {
+        return SetFilter.filter(urs, (UR ur) -> ur.getRole() == role);
+    }
+
+    public Set<UR> getUrs(User user) {
+        return SetFilter.filter(urs, (UR ur) -> ur.getUser() == user);
+    }
+
+    public void assignUr() {
+        boolean res = false;
+
+        while (!res) {
+            res = assignUr(getRandomUser(), getRandomRole());
+        }
+
+    }
+
+    public boolean assignUr(User user, Role role) {
         UR ur = new UR();
         ur.setUser(user);
         ur.setRole(role);
@@ -164,23 +250,17 @@ public class Workload {
         return res;
     }
 
-    public boolean assign_perm() {
-        PA pa = new PA();
+    public boolean assignPa() {
         boolean res = false;
-        RandomPicker<Perm> permPicker = new RandomPicker<Perm>(perms);
-        RandomPicker<Role> rolePicker = new RandomPicker<Role>(roles);
 
-        while(!res) {
-            pa.setPerm(permPicker.getRandomElement());
-            pa.setRole(rolePicker.getRandomElement());
-            res = pa.add();
+        while (!res) {
+            res = assignPerm(getRandomPerm(), getRandomRole());
         }
 
-        pas.add(pa);
         return res;
     }
 
-    public boolean assign_perm(Perm perm, Role role) {
+    public boolean assignPerm(Perm perm, Role role) {
         PA pa = new PA();
         pa.setPerm(perm);
         pa.setRole(role);
@@ -189,25 +269,28 @@ public class Workload {
         return res;
     }
 
-    public UR revoke_user() {
-        UR ur = new RandomPicker<UR>(urs).getRandomElement();
-        if(!revoke_user(ur)) {
-            throw new Error("fail to revoke user");
+    public UR revokeUr() {
+        return revokeUr(getRandomUr());
+    }
+
+    public UR revokeUr(UR ur) {
+        if (ur==null || !urs.remove(ur) || !ur.remove()) {
+            throw new Error("cannot revoke the role");
         }
         return ur;
     }
 
-    public boolean revoke_user(UR ur) {
-        if(ur==null) return false;
-        return urs.remove(ur) && ur.remove();
+    public PA revokePa() {
+        return revokePa(getRandomPa());
     }
 
-    public boolean revoke_perm() {
-        PA pa = new RandomPicker<PA>(pas).getRandomElement();
-        return (pa!=null) && pas.remove(pa) && pa.remove();
+    public PA revokePa(PA pa) {
+        if ((pa == null) || !pas.remove(pa) || !pa.remove())
+            throw new Error("cannnot revoke permission");
+        return pa;
     }
 
-    public void print_sizes() {
+    public void printSizes() {
         System.out.println("size of users: " + users.size());
         System.out.println("size of roles: " + roles.size());
         System.out.println("size of perms: " + perms.size());

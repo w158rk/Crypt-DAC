@@ -2,10 +2,7 @@ package org.lab510.cryptodac.dac;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-
 import java.io.IOException;
-
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.lab510.cryptodac.config.ConfigParser;
@@ -22,8 +19,7 @@ public class PublicKeyDACTest {
         try {
             config = parser.parse("test.properties");
             new ConfigProcessor().process(config);
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             fail();
         }
         dac = new PublicKeyDAC(config);
@@ -33,29 +29,30 @@ public class PublicKeyDACTest {
     @Test
     public void testAddUser() {
         dac.addUser();
-        assertEquals(config.getIntegerValue("numUser")+1, dac.getWorkload().getUsers().size());
-        assertEquals(1, dac.getTxs().size());
+        assertEquals(config.getIntegerValue("numUser") + 1, dac.getWorkload().getUsers().size());
+        assertEquals(1, dac.txs.size());
     }
 
     @Test
     public void testAssignUser() {
-        dac.assignUser();
+        dac.assignRole();
         assertEquals(config.getIntegerValue("numUser"), dac.getWorkload().getUsers().size());
         assertEquals(config.getIntegerValue("numRole"), dac.getWorkload().getRoles().size());
-        assertEquals(config.getIntegerValue("numUR")+1, dac.getWorkload().getUrs().size());
-        assertEquals(4, dac.getTxs().size());
+        assertEquals(config.getIntegerValue("numUR") + 1, dac.getWorkload().getUrs().size());
+        assertEquals(2, dac.txs.size());
     }
 
-    @Test
-    public void testRevokeUser() {
-        dac.revokeUser();
-    }
+    // @Test
+    // public void testRevokeUser() {
+    //     dac.revokeUser();
+    // }
 
-    @Test
-    public void testRun() {
-        assertEquals(config.getIntegerValue("numUR"), dac.getWorkload().getUrs().size());
-        dac.run();
-        assertEquals(config.getIntegerValue("numUR")+30*dac.getRateAssignUser(), dac.getWorkload().getUrs().size());
-        assertEquals(4*30*dac.getRateAssignUser(), dac.getTxs().size());
-    }
+    // @Test
+    // public void testRun() {
+    //     assertEquals(config.getIntegerValue("numUR"), dac.getWorkload().getUrs().size());
+    //     dac.run();
+    //     assertEquals(config.getIntegerValue("numUR") + 30 * dac.rateAssignUser,
+    //             dac.getWorkload().getUrs().size());
+    //     assertEquals(4 * 30 * dac.rateAssignUser, dac.txs.size());
+    // }
 }

@@ -115,7 +115,7 @@ public class WorkloadInitializer {
         int count = 0;
         while(count<minRolesPerUser) {
             Role role = findRoleForUserWithPriority();
-            if(workload.assign_user(user, role)) count ++;
+            if(workload.assignUr(user, role)) count ++;
         }
     }
 
@@ -163,7 +163,7 @@ public class WorkloadInitializer {
         int count = workload.getUserMax().numRoles();
         while(count < maxRolesPerUser) {
             Role role = findRandomRoleAvailableForMoreUser();
-            if(workload.assign_user(workload.getUserMax(), role)) count ++;
+            if(workload.assignUr(workload.getUserMax(), role)) count ++;
         }
     }
 
@@ -178,7 +178,7 @@ public class WorkloadInitializer {
         int count = role.numUsers();
         while(count < minUsersPerRole) {
             User user = findRandomUserAvailableForMoreRole();
-            if(workload.assign_user(user, role)) count ++;
+            if(workload.assignUr(user, role)) count ++;
         }
     }
 
@@ -206,7 +206,7 @@ public class WorkloadInitializer {
         int count = workload.getRoleMaxU().numUsers();
         while(count<maxUsersPerRole) {
             User user = findRandomUserAvailableForMoreRole();
-            if(workload.assign_user(user, workload.getRoleMaxU())) count ++;
+            if(workload.assignUr(user, workload.getRoleMaxU())) count ++;
         }
     }
 
@@ -219,7 +219,7 @@ public class WorkloadInitializer {
             User user = findRandomUserAvailableForMoreRole();
             Role role = findRandomRoleAvailableForMoreUser();
 
-            if(workload.assign_user(user, role))
+            if(workload.assignUr(user, role))
                 count ++;
         }
     }
@@ -245,7 +245,7 @@ public class WorkloadInitializer {
         int count = 0;
         while(count<minRolesPerPerm) {
             Role role = findRoleForPermWithPriority();
-            if(workload.assign_perm(perm, role)) count ++;
+            if(workload.assignPerm(perm, role)) count ++;
         }
     }
 
@@ -294,7 +294,7 @@ public class WorkloadInitializer {
         int count = workload.getPermMax().numRoles();
         while(count < maxRolesPerPerm) {
             Role role = findRandomRoleAvailableForMorePerm();
-            if(workload.assign_perm(workload.getPermMax(), role)) count ++;
+            if(workload.assignPerm(workload.getPermMax(), role)) count ++;
         }
     }
 
@@ -309,7 +309,7 @@ public class WorkloadInitializer {
         int count = role.numPerms();
         while(count < minPermsPerRole) {
             Perm perm = findRandomPermAvailableForMoreRole();
-            if(workload.assign_perm(perm, role)) count ++;
+            if(workload.assignPerm(perm, role)) count ++;
         }
     }
 
@@ -337,7 +337,7 @@ public class WorkloadInitializer {
         int count = workload.getRoleMaxP().numPerms();
         while(count<maxPermsPerRole) {
             Perm perm = findRandomPermAvailableForMoreRole();
-            if(workload.assign_perm(perm, workload.getRoleMaxP())) count ++;
+            if(workload.assignPerm(perm, workload.getRoleMaxP())) count ++;
         }
     }
 
@@ -350,7 +350,7 @@ public class WorkloadInitializer {
             Perm perm = findRandomPermAvailableForMoreRole();
             Role role = findRandomRoleAvailableForMorePerm();
 
-            if(workload.assign_perm(perm, role))
+            if(workload.assignPerm(perm, role))
                 count ++;
         }
     }
