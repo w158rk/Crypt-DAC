@@ -16,7 +16,7 @@ import org.lab510.cryptodac.workload.WorkloadInitializer;
 
 class PublicKeyUserRevoker {
     private Workload workload;
-    private List<Transaction<PublicKeyPlayer, PublicKeyEvent>> txs;
+    private List<Transaction<Player, PublicKeyEvent>> txs;
     PublicKeyUserRevoker(Workload workload) {
         this.workload = workload;
         txs = new ArrayList<>();
@@ -25,21 +25,21 @@ class PublicKeyUserRevoker {
     void revoke() {
         UR ur = workload.revoke_user();
 
-        txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.GEN_KEY));
+        txs.add(new Transaction<Player,PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.GEN_KEY));
 
         for(int i=0; i<ur.getRole().numUsers(); i++) {
-            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.ENCRYPT));
-            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SIGN));
+            txs.add(new Transaction<Player,PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.ENCRYPT));
+            txs.add(new Transaction<Player,PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SIGN));
         }
 
         for(PA pa : ur.getRole().getPas()) {
-            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SYM_GEN_KEY));
-            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SYM_DECRYPT));
-            txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SYM_ENCRYPT));
+            txs.add(new Transaction<Player,PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SYM_GEN_KEY));
+            txs.add(new Transaction<Player,PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SYM_DECRYPT));
+            txs.add(new Transaction<Player,PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SYM_ENCRYPT));
 
             for(int i=0; i<pa.getPerm().numRoles(); i++) {
-                txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.ENCRYPT));
-                txs.add(new Transaction<PublicKeyPlayer,PublicKeyEvent>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SIGN));
+                txs.add(new Transaction<Player,PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.ENCRYPT));
+                txs.add(new Transaction<Player,PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SIGN));
             }
 
         }
@@ -51,7 +51,7 @@ public class PublicKeyDAC implements DAC{
 
 
     private Workload workload;
-    private List<Transaction<PublicKeyPlayer, PublicKeyEvent>> txs;
+    private List<Transaction<Player, PublicKeyEvent>> txs;
     private Configuration configuration;
     private DayTimer dayTimer;
     private int rateAssignUser = 0;
@@ -76,14 +76,14 @@ public class PublicKeyDAC implements DAC{
         initializer.initialize();
     }
 
-    List<Transaction<PublicKeyPlayer, PublicKeyEvent>> getTxs() {
+    List<Transaction<Player, PublicKeyEvent>> getTxs() {
         return txs;
     }
 
     @Override
     public void addUser() {
         workload.addUser();
-        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.GEN_KEY));
+        txs.add(new Transaction<>(Player.ADMIN, PublicKeyEvent.GEN_KEY));
     }
 
     @Override
@@ -119,10 +119,10 @@ public class PublicKeyDAC implements DAC{
     @Override
     public void assignUser() {
         workload.assign_user();
-        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.VERIFY));
-        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.DECRYPT));
-        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.ENCRYPT));
-        txs.add(new Transaction<>(PublicKeyPlayer.ADMIN, PublicKeyEvent.SIGN));
+        txs.add(new Transaction<>(Player.ADMIN, PublicKeyEvent.VERIFY));
+        txs.add(new Transaction<>(Player.ADMIN, PublicKeyEvent.DECRYPT));
+        txs.add(new Transaction<>(Player.ADMIN, PublicKeyEvent.ENCRYPT));
+        txs.add(new Transaction<>(Player.ADMIN, PublicKeyEvent.SIGN));
     }
 
     @Override
