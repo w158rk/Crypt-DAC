@@ -7,9 +7,8 @@ import org.junit.jupiter.api.Test;
 public class PublicKeyEventFactoryTest {
     @Test
     public void testPublicKeyEventFactory() {
-        String prefix = "PublicKeyEvent:";
         for(PublicKeyEventFactory.EventType type : PublicKeyEventFactory.EventType.values()) {
-            assertEquals(prefix + type.name(), PublicKeyEventFactory.getEvent(type).toString());
+            assertEquals(type.name(), PublicKeyEventFactory.getEvent(type).toString());
         }
     }
 }

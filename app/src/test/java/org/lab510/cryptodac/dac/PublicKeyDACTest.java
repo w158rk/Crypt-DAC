@@ -19,7 +19,7 @@ public class PublicKeyDACTest {
         try {
             config = parser.parse("test.properties");
             new ConfigProcessor().process(config);
-        } catch (IOException e) {
+        } catch (Exception e) {
             fail();
         }
         dac = new PublicKeyDAC(config);
@@ -35,7 +35,7 @@ public class PublicKeyDACTest {
 
     @Test
     public void testAssignUser() {
-        dac.assignRole();
+        dac.assignUr();
         assertEquals(config.getIntegerValue("numUser"), dac.getWorkload().getUsers().size());
         assertEquals(config.getIntegerValue("numRole"), dac.getWorkload().getRoles().size());
         assertEquals(config.getIntegerValue("numUR") + 1, dac.getWorkload().getUrs().size());

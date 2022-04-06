@@ -64,12 +64,6 @@ public class WorkloadTest {
         workload.revokeUr();
         workload.assignUr();
 
-        for (int i=0; i < 10; i++) {
-            workload.removeUser();
-            assertEquals(9-i, workload.getUsers().size());
-        }
-
-        assertEquals(0, workload.getUrs().size());
     }
 
 

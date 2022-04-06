@@ -3,15 +3,15 @@ package org.lab510.cryptodac.dac;
 import org.lab510.cryptodac.config.Configuration;
 import org.lab510.cryptodac.dac.event.PREEventFactory;
 import org.lab510.cryptodac.dac.event.PREEventFactory.EventType;
+import org.lab510.cryptodac.utils.Printer;
 import org.lab510.cryptodac.workload.PA;
 import org.lab510.cryptodac.workload.Role;
 import org.lab510.cryptodac.workload.UR;
+import org.lab510.cryptodac.workload.User;
 
 public class PREDAC extends DAC {
 
-    private PREUserRevoker userRevoker = new PREUserRevoker(this);
-
-    PREDAC(Configuration configuration) {
+    public PREDAC(Configuration configuration) {
         super(configuration);
     }
 
@@ -50,22 +50,6 @@ public class PREDAC extends DAC {
         addEvent(Player.USER, PREEventFactory.getEvent(EventType.KEY_GEN));
     }
 
-    /**
-     * @brief no en/decryption
-     */
-    @Override
-    public void assignPerm() {
-        super.assignPerm();
-    }
-
-    /**
-     * @brief no en/decryption
-     */
-    @Override
-    public void assignRole() {
-        super.assignRole();
-    }
-
     @Override
     public void read() {
         addEvent(Player.CLOUD, PREEventFactory.getEvent(EventType.REENC));
@@ -75,27 +59,20 @@ public class PREDAC extends DAC {
         addEvent(Player.USER, PREEventFactory.getEvent(EventType.SYM_DEC));
     }
 
-    @Override
-    public void removePerm() {
-        super.removePerm();
-    }
-
     /**
      *
-     * 1. revoke all the permissions the given rolel has
+     * 1. revoke all the permissions the given role has
      */
     @Override
     public Role removeRole() {
         Role role = super.removeRole();
-        for(var pa : workload.getPas(role)) {
-            addRevokePermEvents();
-        }
         return role;
     }
 
     @Override
-    public void removeUser() {
-        // TODO Auto-generated method stub
+    public User removeUser() {
+        User user = super.removeUser();
+        return user;
     }
 
     @Override
@@ -111,15 +88,16 @@ public class PREDAC extends DAC {
      *        encrypt key and upload
      */
     @Override
-    public PA revokePa(PA pa) {
-        addRevokePermEvents();
-        return super.revokePa(pa);
+    public PA revokePaInner(PA pa) {
+        super.revokePaInner(pa);
+        addRevokePaEvents();
+        return pa;
     }
 
     @Override
-    public UR revokeUr(UR ur) {
-        super.revokeUr(ur);
-        addRevokeUrEvents(ur);
+    UR revokeUrInner(UR ur) {
+        super.revokeUrInner(ur);
+        addRevokeUrEvents(ur);          // this has to be after super.revoke
         return ur;
     }
 
@@ -134,15 +112,10 @@ public class PREDAC extends DAC {
          * 2+3 = add role
          */
         for(var pa : workload.getPas(ur.getRole())) {
-            addRevokePermEvents();
+            addRevokePaEvents();
         }
 
         addAddRoleEvents();
-    }
-
-    @Override
-    public void run() {
-        // TODO Auto-generated method stub
     }
 
     @Override
@@ -154,7 +127,7 @@ public class PREDAC extends DAC {
         addEvent(Player.USER, PREEventFactory.getEvent(EventType.SYM_ENC));
     }
 
-    void addRevokePermEvents() {
+    void addRevokePaEvents() {
         addEvent(Player.ADMIN, PREEventFactory.getEvent(EventType.DEC_2));
         addEvent(Player.ADMIN, PREEventFactory.getEvent(EventType.SYM_DEC));
         addEvent(Player.ADMIN, PREEventFactory.getEvent(EventType.SYM_KEY_GEN));

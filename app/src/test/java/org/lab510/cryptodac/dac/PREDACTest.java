@@ -1,6 +1,7 @@
 package org.lab510.cryptodac.dac;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +63,14 @@ public class PREDACTest {
     }
 
     @Test
-    public void testRevokePerm() {
+    public void testRemoveUser() {
+        dac.removeUser();
+        assertEquals(config.getIntegerValue("numUser") - 1, dac.getWorkload().getUsers().size());
+        System.out.println("# of transactions generated in testRemoveUser : " + dac.txs.size());
+    }
+
+    @Test
+    public void testRevokePa() {
         dac.revokePa();
         assertEquals(config.getIntegerValue("numPA") - 1, dac.getWorkload().getPas().size());
         assertEquals(5, dac.txs.size());
@@ -83,9 +91,16 @@ public class PREDACTest {
      * 管理员控制云端增加绑定数据⟨u,r⟩
      */
     public void testAssignUser() {
-        dac.assignRole();
+        dac.assignUr();
         assertEquals(config.getIntegerValue("numUser"), dac.getWorkload().getUsers().size());
         assertEquals(config.getIntegerValue("numRole"), dac.getWorkload().getRoles().size());
         assertEquals(config.getIntegerValue("numUR") + 1, dac.getWorkload().getUrs().size());
     }
+
+    // @Test
+    // public void testRun() {
+    //     assertEquals(config.getIntegerValue("numUR"), dac.getWorkload().getUrs().size());
+    //     new DACRunnner(dac).run();
+    // }
+
 }

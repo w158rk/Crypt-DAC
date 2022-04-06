@@ -19,7 +19,7 @@ public class ConfigParser {
      * @throws IOException
      * @throws NullPointerException
      */
-    public Configuration parse (String filename) throws IOException,NullPointerException {
+    public Configuration parse (String filename) throws IOException {
         Properties props = new Properties();
         if(!filename.startsWith("/")) {
             filename = "/" + filename;

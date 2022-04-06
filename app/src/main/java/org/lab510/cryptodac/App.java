@@ -3,12 +3,27 @@
  */
 package org.lab510.cryptodac;
 
+import org.lab510.cryptodac.config.ConfigParser;
+import org.lab510.cryptodac.config.ConfigProcessor;
+import org.lab510.cryptodac.config.Configuration;
+import org.lab510.cryptodac.dac.DAC;
+import org.lab510.cryptodac.dac.DACRunnner;
+import org.lab510.cryptodac.dac.PREDAC;
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        String configFile = args[0] + ".properties";
+        Configuration config = null;
+
+        try {
+            config = new ConfigParser().parse(configFile);
+            new ConfigProcessor().process(config);
+        } catch (Exception e) {
+            System.out.println(String.format("cannot process config file %s", configFile));
+        }
+
+        DAC dac = new PREDAC(config);
+        new DACRunnner(dac).run();
     }
 }

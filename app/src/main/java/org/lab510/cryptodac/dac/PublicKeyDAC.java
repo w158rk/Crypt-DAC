@@ -62,19 +62,12 @@ public class PublicKeyDAC extends DAC {
     }
 
     @Override
-    public void removeUser() {
-        // TODO Auto-generated method stub
-
+    public User removeUser() {
+        return super.removeUser();
     }
 
     @Override
     public void addPerm() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void removePerm() {
         // TODO Auto-generated method stub
 
     }
@@ -92,8 +85,8 @@ public class PublicKeyDAC extends DAC {
     }
 
     @Override
-    public void assignRole() {
-        super.assignRole();
+    public void assignUr() {
+        super.assignUr();
         addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(PublicKeyEventFactory.EventType.DEC));
         addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(PublicKeyEventFactory.EventType.ENC));
     }
@@ -105,7 +98,7 @@ public class PublicKeyDAC extends DAC {
     }
 
     @Override
-    public void assignPerm() {
+    public void assignPa() {
         // TODO Auto-generated method stub
 
     }
@@ -126,28 +119,6 @@ public class PublicKeyDAC extends DAC {
     public void write() {
         // TODO Auto-generated method stub
 
-    }
-
-    @Override
-    public void run() {
-        int dayLimited = 30;
-
-        initializeWorkload();
-        calculateRates();
-
-        while (dayTimer.getToday() < dayLimited) {
-            for (int i = 0; i < rateAssignUser; i++) {
-                assignRole();
-            }
-            dayTimer.increment();
-        }
-    }
-
-    private void calculateRates() {
-        double r = 0.1 * Math.sqrt(workload.getUsers().size());
-        double muA = configuration.getDoubleValue("muA");
-        double muU = configuration.getDoubleValue("muU");
-        rateAssignUser = (int) (muA * muU * r);
     }
 
     @Override

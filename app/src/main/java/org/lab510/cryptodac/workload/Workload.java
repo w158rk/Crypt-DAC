@@ -172,7 +172,7 @@ public class Workload {
         return picker.getRandomElement();
     }
 
-    public boolean removeUser() {
+    public User removeUser() {
         return removeUser(getRandomUser());
     }
 
@@ -180,24 +180,28 @@ public class Workload {
         return removeRole(getRandomRole());
     }
 
-    public boolean removePerm() {
+    public Perm removePerm() {
         return removePerm(getRandomPerm());
     }
 
-    public boolean removeUser(User user) {
-        // TODO
-        var tUrs = getUrs(user);
-        for (var ur : tUrs) {
-            urs.remove(ur);
+    public User removeUser(User user) {
+        assert getUrs(user).size() == 0;
+
+        if (!users.remove(user)) {
+            throw new Error("cannot remove the user");
         }
-        return users.remove(user);
+
+        return user;
     }
 
     public Role removeRole(Role role) {
-        var tPas = getPas(role);
-        var tUrs = getUrs(role);
-        assert tPas.size() == 0;
-        assert tUrs.size() == 0;
+        // rightward, must be done by DAC
+        assert getPas(role).size() == 0;
+
+        // leftward, done here
+        for (var ur : getUrs(role)) {
+            revokeUr(ur);
+        }
 
         if (!roles.remove(role)) {
             throw new Error("cannot remove the role");
@@ -206,14 +210,17 @@ public class Workload {
         return role;
     }
 
-    public boolean removePerm(Perm perm) {
-        // TODO
+    public Perm removePerm(Perm perm) {
         // remove all the PAs linked to this permission
-        var tPas = getPas(perm);
-        for (var pa : tPas) {
-            pas.remove(pa);
+        for (var pa : getPas(perm)) {
+            revokePa(pa);
         }
-        return perms.remove(perm);
+
+        if (!perms.remove(perm)) {
+            throw new Error("cannot remove the permission");
+        }
+
+        return perm;
     }
 
     public Set<PA> getPas(Role role) {

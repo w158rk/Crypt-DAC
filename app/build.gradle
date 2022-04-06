@@ -44,7 +44,7 @@ javadoc {
 
 application {
     // Define the main class for the application.
-    mainClass = 'cryptodac.App'
+    mainClass = 'org.lab510.cryptodac.App'
 }
 
 tasks.named('test') {

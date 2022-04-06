@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.lab510.cryptodac.config.Configuration;
 import org.lab510.cryptodac.dac.event.Event;
-import org.lab510.cryptodac.time.DayTimer;
+import org.lab510.cryptodac.utils.Printer;
 import org.lab510.cryptodac.workload.PA;
+import org.lab510.cryptodac.workload.Perm;
 import org.lab510.cryptodac.workload.Role;
 import org.lab510.cryptodac.workload.UR;
+import org.lab510.cryptodac.workload.User;
 import org.lab510.cryptodac.workload.Workload;
 import org.lab510.cryptodac.workload.WorkloadInitializer;
 
@@ -15,18 +17,29 @@ import org.lab510.cryptodac.workload.WorkloadInitializer;
  * dynamic access control
  */
 public abstract class DAC {
+
+    Workload workload;
+    List<Transaction<Player, Event>> txs;
+    Configuration configuration;
+
     public void addUser() {
         workload.addUser();
     }
 
-    public abstract void removeUser();
+    public User removeUser() {
+        var user = workload.getRandomUser();
+        for (UR ur : workload.getUrs(user)) {
+            revokeUrInner(ur);
+        }
+        return workload.removeUser(user);
+    }
 
     public void addPerm() {
         workload.addPerm();
     }
 
-    public void removePerm() {
-        workload.removePerm();
+    public Perm removePerm() {
+        return workload.removePerm();
     }
 
     public void addRole() {
@@ -35,36 +48,74 @@ public abstract class DAC {
 
     public Role removeRole() {
         Role role = workload.getRandomRole();
-        for(UR ur : workload.getUrs(role)) {            // 不需要额外的密码操作，只需要删除绑定
-            workload.revokeUr(ur);
-        }
-        for(PA pa : workload.getPas(role)) {
-            revokePa(pa);                         // 这个就需要密码操作了，指导想法：向右的是需要的
+        for (PA pa : workload.getPas(role)) {
+            revokePaInner(pa); // 指导想法：向右的是需要密码操作的
         }
         return workload.removeRole(role);
     }
 
-    public void assignRole() {
+    public void assignUr() {
+        beforeAssignUr();
         workload.assignUr();
+        afterAssignUr();
     }
 
+    void beforeAssignUr() {
+        Printer.print("[au] begin");
+    }
+
+    void afterAssignUr() {
+        Printer.print("[au] end");
+    }
+
+
+    // never been called inside the class
     public UR revokeUr() {
-        return revokeUr(workload.getRandomUr());
+        beforeRevokeUr();
+        var ret = revokeUrInner(workload.getRandomUr());
+        afterRevokeUr();
+        return ret;
     }
 
-    public UR revokeUr(UR ur) {
+    void beforeRevokeUr() {
+        Printer.print("[ru] begin");
+    }
+    void afterRevokeUr() {
+        Printer.print("[ru] end");
+    }
+
+    UR revokeUrInner(UR ur) {
         return workload.revokeUr(ur);
     }
 
-    public void assignPerm() {
+    public void assignPa() {
         workload.assignPa();
     }
 
-    public PA revokePa() {
-        return revokePa(workload.getRandomPa());
+    void beforeAssignPa() {
+        Printer.print("[ap] begin");
     }
 
-    public PA revokePa(PA pa) {
+    void afterAssignPa() {
+        Printer.print("[ap] end");
+    }
+
+    public PA revokePa() {
+        beforeRevokePa();
+        var ret = revokePaInner(workload.getRandomPa());
+        afterRevokePa();
+        return ret;
+    }
+
+    void beforeRevokePa() {
+        Printer.print("[rp] begin");
+    }
+
+    void afterRevokePa() {
+        Printer.print("[rp] end");
+    }
+
+    public PA revokePaInner(PA pa) {
         return workload.revokePa(pa);
     }
 
@@ -72,24 +123,18 @@ public abstract class DAC {
 
     public abstract void write();
 
-    public abstract void run();
-
     public abstract void report();
 
-    Workload workload;
-    List<Transaction<Player, Event>> txs;
-    Configuration configuration;
-    DayTimer dayTimer;
-    int rateAssignUser = 0;
-
-    DAC(Configuration configuration) {
+    public DAC(Configuration configuration) {
         this.configuration = configuration;
         workload = new Workload();
         txs = new ArrayList<>();
-        dayTimer = new DayTimer();
+
+        initializeWorkload();
     }
 
     void addEvent(Player player, Event event) {
+        Printer.print(String.format("[tx] %s - %s", player.name(), event.toString()));
         txs.add(new Transaction<Player, Event>(player, event));
     }
 
