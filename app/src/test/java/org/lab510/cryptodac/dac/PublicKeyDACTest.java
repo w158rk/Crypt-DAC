@@ -34,12 +34,36 @@ public class PublicKeyDACTest {
     }
 
     @Test
-    public void testAssignUser() {
+    public void testAssignUr() {
         dac.assignUr();
         assertEquals(config.getIntegerValue("numUser"), dac.getWorkload().getUsers().size());
         assertEquals(config.getIntegerValue("numRole"), dac.getWorkload().getRoles().size());
         assertEquals(config.getIntegerValue("numUR") + 1, dac.getWorkload().getUrs().size());
         assertEquals(2, dac.txs.size());
+    }
+
+    @Test
+    public void testAssignPa() {
+        dac.assignPa();
+        assertEquals(config.getIntegerValue("numUser"), dac.getWorkload().getUsers().size());
+        assertEquals(config.getIntegerValue("numRole"), dac.getWorkload().getRoles().size());
+        assertEquals(config.getIntegerValue("numPA") + 1, dac.getWorkload().getPas().size());
+        assertEquals(2, dac.txs.size());
+    }
+
+    @Test
+    public void testRevokePa() {
+        dac.revokePa();
+        assertEquals(config.getIntegerValue("numPA") - 1, dac.getWorkload().getPas().size());
+        System.out.println("# of transactions generated in testRevokePa : " + dac.txs.size());
+    }
+
+    @Test
+    public void testRevokeUr() {
+        var ur = dac.revokeUr();
+        assertEquals(config.getIntegerValue("numUR") - 1, dac.getWorkload().getUrs().size());
+
+        System.out.println("# of transactions generated in testRevokeUr : " + dac.txs.size());
     }
 
     // @Test

@@ -54,10 +54,14 @@ public abstract class DAC {
         return workload.removeRole(role);
     }
 
-    public void assignUr() {
+    public final void assignUr() {
         beforeAssignUr();
-        workload.assignUr();
+        assignUrInner();
         afterAssignUr();
+    }
+
+    void assignUrInner() {
+        workload.assignUr();
     }
 
     void beforeAssignUr() {
@@ -70,7 +74,7 @@ public abstract class DAC {
 
 
     // never been called inside the class
-    public UR revokeUr() {
+    public final UR revokeUr() {
         beforeRevokeUr();
         var ret = revokeUrInner(workload.getRandomUr());
         afterRevokeUr();
@@ -88,7 +92,13 @@ public abstract class DAC {
         return workload.revokeUr(ur);
     }
 
-    public void assignPa() {
+    public final void assignPa() {
+        beforeAssignPa();
+        assignPaInner();
+        afterAssignPa();
+    }
+
+    void assignPaInner() {
         workload.assignPa();
     }
 
@@ -100,7 +110,7 @@ public abstract class DAC {
         Printer.print("[ap] end");
     }
 
-    public PA revokePa() {
+    public final PA revokePa() {
         beforeRevokePa();
         var ret = revokePaInner(workload.getRandomPa());
         afterRevokePa();

@@ -1,56 +1,50 @@
 package org.lab510.cryptodac.dac;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.lab510.cryptodac.config.Configuration;
 import org.lab510.cryptodac.dac.event.PublicKeyEventFactory;
-import org.lab510.cryptodac.time.DayTimer;
+import org.lab510.cryptodac.dac.event.PublicKeyEventFactory.EventType;
+import org.lab510.cryptodac.utils.Printer;
 import org.lab510.cryptodac.workload.PA;
 import org.lab510.cryptodac.workload.Role;
 import org.lab510.cryptodac.workload.UR;
 import org.lab510.cryptodac.workload.User;
-import org.lab510.cryptodac.workload.Workload;
-import org.lab510.cryptodac.workload.WorkloadInitializer;
 
 // class PublicKeyUserRevoker {
-//     private Workload workload;
+// private Workload workload;
 
-//     PublicKeyUserRevoker(Workload workload) {
-//         this.workload = workload;
-//         txs = new ArrayList<>();
-//     }
+// PublicKeyUserRevoker(Workload workload) {
+// this.workload = workload;
+// txs = new ArrayList<>();
+// }
 
-//     void revoke() {
-//         UR ur = workload.revoke_user();
+// void revoke() {
+// UR ur = workload.revoke_user();
 
-//         txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.GEN_KEY));
+// txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.GEN_KEY));
 
-//         for (int i = 0; i < ur.getRole().numUsers(); i++) {
-//             txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.ENCRYPT));
-//             txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SIGN));
-//         }
+// for (int i = 0; i < ur.getRole().numUsers(); i++) {
+// txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.ENCRYPT));
+// txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SIGN));
+// }
 
-//         for (PA pa : ur.getRole().getPas()) {
-//             txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SYM_GEN_KEY));
-//             txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SYM_DECRYPT));
-//             txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SYM_ENCRYPT));
+// for (PA pa : ur.getRole().getPas()) {
+// txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SYM_GEN_KEY));
+// txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SYM_DECRYPT));
+// txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SYM_ENCRYPT));
 
-//             for (int i = 0; i < pa.getPerm().numRoles(); i++) {
-//                 txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.ENCRYPT));
-//                 txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SIGN));
-//             }
+// for (int i = 0; i < pa.getPerm().numRoles(); i++) {
+// txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.ENCRYPT));
+// txs.add(new Transaction<Player, PublicKeyEvent>(Player.ADMIN, PublicKeyEvent.SIGN));
+// }
 
-//         }
+// }
 
-//     }
+// }
 // }
 
 public class PublicKeyDAC extends DAC {
 
-    PublicKeyDAC(Configuration configuration) {
+    public PublicKeyDAC(Configuration configuration) {
         super(configuration);
         // TODO Auto-generated constructor stub
     }
@@ -58,55 +52,72 @@ public class PublicKeyDAC extends DAC {
     @Override
     public void addUser() {
         super.addUser();
-        addEvent(Player.USER, PublicKeyEventFactory.getEvent(PublicKeyEventFactory.EventType.KEY_GEN));
+        addEvent(Player.USER, PublicKeyEventFactory.getEvent(EventType.KEY_GEN));
     }
 
     @Override
-    public User removeUser() {
-        return super.removeUser();
+    void assignUrInner() {
+        super.assignUrInner();
+        addAssignUrEvents();
+    }
+
+    void addAssignUrEvents() {
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.DEC));
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.ENC));
+    }
+
+
+    @Override
+    void assignPaInner() {
+        super.assignPaInner();
+        addAssignPaEvents();
+    }
+
+    void addAssignPaEvents() {
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.DEC));
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.ENC));
     }
 
     @Override
-    public void addPerm() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void addRole() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public Role removeRole() {
-        // TODO Auto-generated method stub
-        return super.removeRole();
-    }
-
-    @Override
-    public void assignUr() {
-        super.assignUr();
-        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(PublicKeyEventFactory.EventType.DEC));
-        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(PublicKeyEventFactory.EventType.ENC));
-    }
-
-    @Override
-    public UR revokeUr() {
-        UR ur = workload.revokeUr();
+    UR revokeUrInner(UR ur) {
+        super.revokeUrInner(ur);
+        addRevokeUrEvents(ur);
         return ur;
     }
 
-    @Override
-    public void assignPa() {
-        // TODO Auto-generated method stub
+    void addRevokeUrEvents(UR ur) {
+        for(var pa : workload.getPas(ur.getRole())) {
+            addRevokePaEvents(pa);
+        }
+
+        addAddRoleEvents();
+
+        for(var t : workload.getUrs(ur.getRole())) {        // re-assign
+            addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.ENC));
+        }
 
     }
 
+    void addAddRoleEvents() {
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.KEY_GEN));
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.ENC));
+    }
+
     @Override
-    public PA revokePa() {
-        // TODO Auto-generated method stub
-        return super.revokePa();
+    public PA revokePaInner(PA pa) {
+        super.revokePaInner(pa);
+        addRevokePaEvents(pa);
+        return pa;
+    }
+
+    void addRevokePaEvents(PA pa) {
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.DEC));
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.SYM_DEC));
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.SYM_KEY_GEN));
+        addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.SYM_ENC));
+        for (var p : workload.getPas(pa.getPerm())) {
+            addEvent(Player.ADMIN, PublicKeyEventFactory.getEvent(EventType.ENC));
+        }
     }
 
     @Override

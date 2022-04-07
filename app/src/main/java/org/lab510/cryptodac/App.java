@@ -8,7 +8,7 @@ import org.lab510.cryptodac.config.ConfigProcessor;
 import org.lab510.cryptodac.config.Configuration;
 import org.lab510.cryptodac.dac.DAC;
 import org.lab510.cryptodac.dac.DACRunnner;
-import org.lab510.cryptodac.dac.PREDAC;
+import org.lab510.cryptodac.dac.PublicKeyDAC;
 
 public class App {
 
@@ -23,7 +23,7 @@ public class App {
             System.out.println(String.format("cannot process config file %s", configFile));
         }
 
-        DAC dac = new PREDAC(config);
+        DAC dac = new PublicKeyDAC(config);
         new DACRunnner(dac).run();
     }
 }
