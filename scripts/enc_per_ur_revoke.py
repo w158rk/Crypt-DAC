@@ -42,8 +42,9 @@ def analyze(filename):
     return enc_cnt / ur_cnt if ur_cnt else -1
 
 name = sys.argv[1]
-cnt = int(sys.argv[2])
-filenames = [f'output/{name}{i}.log' for i in range(1, cnt+1)]
+dac = sys.argv[2]
+cnt = int(sys.argv[3])
+filenames = [f'output/{name}-{dac}-{i}.log' for i in range(1, cnt+1)]
 
 results = [analyze(filename) for filename in filenames]
 results = list(filter(lambda r : r!=-1, results))

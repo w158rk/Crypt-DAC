@@ -3,6 +3,7 @@
  */
 package org.lab510.cryptodac;
 
+import java.io.IOException;
 import org.lab510.cryptodac.config.ConfigParser;
 import org.lab510.cryptodac.config.ConfigProcessor;
 import org.lab510.cryptodac.config.Configuration;
@@ -10,22 +11,41 @@ import org.lab510.cryptodac.dac.DAC;
 import org.lab510.cryptodac.dac.DACRunnner;
 import org.lab510.cryptodac.dac.PREDAC;
 import org.lab510.cryptodac.dac.PublicKeyDAC;
+import org.lab510.cryptodac.error.Error;
 
 public class App {
 
-    public static void main(String[] args) {
+    private String[] args;
+    DAC dac = null;
+
+    public App(String[] args) {
+        this.args = args;
+    }
+
+    void checkArgs() throws IOException {
+        if (args.length < 2)
+            throw new Error(
+                    "Use as gradle run --args [domino, emea, firewall1, firewall2, healthcare, university] [PRE, PK]");
+
         String configFile = args[0] + ".properties";
-        Configuration config = null;
+        var config = new ConfigParser().parse(configFile);
+        new ConfigProcessor().process(config);
 
-        try {
-            config = new ConfigParser().parse(configFile);
-            new ConfigProcessor().process(config);
-        } catch (Exception e) {
-            System.out.println(String.format("cannot process config file %s", configFile));
-        }
+        if (args[1].equals("PRE"))
+            dac = new PREDAC(config);
+        else if (args[1].equals("PK"))
+            dac = new PublicKeyDAC(config);
+        else
+            throw new Error("please give the type as PRE or PK");
+    }
 
-        // DAC dac = new PREDAC(config);
-        DAC dac = new PublicKeyDAC(config);
+    void run() {
         new DACRunnner(dac).run();
+    }
+
+    public static void main(String[] args) throws IOException {
+        App app = new App(args);
+        app.checkArgs();
+        app.run();
     }
 }

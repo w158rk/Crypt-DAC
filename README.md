@@ -113,23 +113,23 @@ gradle build
 <!-- USAGE EXAMPLES -->
 ## 使用
 
-目前支持PREDAC和PublicKeyDAC两种DAC方案，可以通过修改`app\src\main\java\org\lab510\cryptodac\App.java`进行选择切换。
+目前支持PREDAC和PublicKeyDAC两种DAC方案。
 
 ```sh
-gradle run --args [domino, emea, firewall1, firewall2, healthcare, university]
+gradle run --args="[domino, emea, firewall1, firewall2, healthcare, university] [PRE, PK]"
 ```
 
 使用Python脚本可以进行多次执行，输出将存储于`output`目录，可以根据需求编辑脚本，当前执行方式
 
 ```sh
 # 执行domino数据集100次
-python scripts/repeat_run.py domino 100
+python scripts/repeat_run.py domino PRE 100
 ```
 
 得到的输出可以使用`enc_per_ur_revoke`分析每次用户角色解绑使用的公钥加密数量
 
 ```sh
-python scripts/enc_per_ur_revoke.py domino 100
+python scripts/enc_per_ur_revoke.py domino PRE 100
 ```
 
 <!-- ROADMAP -->
