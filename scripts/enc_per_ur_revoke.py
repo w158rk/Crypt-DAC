@@ -30,7 +30,10 @@ def analyze(filename):
         if state == State.OUT:
             continue
 
-        if 'ENC_2' in line:
+        if 'SYM_ENC' in line:
+            continue
+
+        if 'ENC' in line:
             enc_cnt += 1
 
     print('total # of encryptions in UR revocations:', enc_cnt)
